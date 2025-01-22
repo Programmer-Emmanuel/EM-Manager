@@ -111,7 +111,7 @@ public function update_put_password(Request $request)
             'date_debut.required' => 'Veuillez renseigner la date de début.',
             'date_fin.required' => 'Veuillez renseigner la date de fin.',
             'date_fin.after' => 'La date de fin doit être supérieure à la date de début.',
-            'type_conge.required' => 'Veuillez renseigner une raison.'
+            'type_conge.required' => 'Veuillez renseigner la raison.'
         ]);
 
         $employe = Auth::guard('employe')->user();
