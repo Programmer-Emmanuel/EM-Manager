@@ -358,6 +358,4 @@ public function approuver($id)
         return redirect()->back()->with('success', 'La demande de congé a été rejetée.');
     }
 
-
-
 }
