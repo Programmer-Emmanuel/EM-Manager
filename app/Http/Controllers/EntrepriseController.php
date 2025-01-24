@@ -135,8 +135,10 @@ class EntrepriseController extends Controller{
         // Récupérer la liste des employés de l'entreprise
         $count_employe = Employe::where('id_entreprise', '=', $entreprise->id)->count();
 
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->count();
+
         // Afficher la vue du tableau de bord
-        return view('dashboard_entreprise', compact('entrepriseDetails','count_employe'));
+        return view('dashboard_entreprise', compact('entrepriseDetails','count_employe','count_conge'));
     }
 
     public function liste_employe(){

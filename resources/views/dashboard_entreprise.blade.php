@@ -20,7 +20,7 @@
 
             <div class="bg-slate-800 text-white p-6 rounded-lg shadow hover:bg-slate-700 transition">
                 <h2 class="text-xl font-semibold">Congés</h2>
-                <p class="text-3xl font-bold mt-2">18</p>
+                <p class="text-3xl font-bold mt-2">{{$count_conge}}</p>
                 <p class="text-sm text-slate-400">Demandes en attente</p>
             </div>
 
