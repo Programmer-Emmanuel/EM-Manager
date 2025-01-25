@@ -24,7 +24,7 @@
             <p class="text-lg text-gray-600 mb-6">Une solution complète pour la gestion de vos employés. EM-Manager vous aide à suivre les horaires, la performance et la gestion des tâches, tout en optimisant la productivité et en améliorant la communication au sein de votre entreprise.</p>
             <p class="text-gray-500 mb-6">Nos outils vous permettent de planifier les plannings, suivre les congés et absences, gérer les évaluations de performance et recevoir des alertes pour les actions à entreprendre concernant vos employés.</p>
             <a href="{{route('service')}}" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">Découvrez nos services</a>
-        </div>
+        </div> 
     </header>
 
 <!-- Section Fonctionnalités -->
