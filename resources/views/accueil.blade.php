@@ -16,7 +16,7 @@
 
     <header class="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-100 gap-3">
         <div class="w-full md:w-2/5 mb-8 md:mb-0" data-aos="fade-right" data-aos-duration="2000">
-            <img src="images/Best App Development Dubai - 100% Customer Satisfaction _ UAE.jpeg" alt="Best App Development" class="w-full h-auto max-w-[400px] mx-auto rounded-lg shadow-lg">
+            <img src="/images/accueil.jpeg" alt="Erreur" class="w-full h-auto max-w-[400px] mx-auto rounded-lg shadow-lg">
         </div>
 
         <div class="w-full md:w-3/5 text-center md:text-left" data-aos="fade-left" data-aos-duration="2000">
