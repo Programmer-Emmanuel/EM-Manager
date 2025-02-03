@@ -146,4 +146,3 @@
     new Chart(ctx, config);
 });
 </script>
-
