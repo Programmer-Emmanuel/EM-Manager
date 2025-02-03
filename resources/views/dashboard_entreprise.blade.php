@@ -73,47 +73,77 @@
 <script>
     // Attendre que la page soit prête
     document.addEventListener('DOMContentLoaded', function () {
-        // Données du graphique (exemple)
-        const data = {
-            labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Decembre'], // Mois
-            datasets: [{
-                label: 'Performances des employés',
-                data: [8, 7, 9, 8.5, 7.5, 8.2, 8, 7, 9, 8.5, 7.5, 8.2], // Scores de performances
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        };
+    const ctx = document.getElementById('performanceChart').getContext('2d');
 
-        const config = {
-            type: 'bar', // Type de graphique (barres)
-            data: data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return 'Score: ' + tooltipItem.raw + '/10';
-                            }
+    // Dégradé de couleur pour un effet plus moderne
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(75, 192, 192, 0.8)');
+    gradient.addColorStop(1, 'rgba(75, 192, 192, 0.2)');
+
+    const data = {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
+        datasets: [{
+            label: 'Performances des employés',
+            data: [8, 7, 9, 8.5, 7.5, 8.2, 8, 7, 9, 8.5, 7.5, 9.2],
+            backgroundColor: gradient, // Dégradé pour effet visuel
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'white',
+            pointBorderColor: 'rgba(75, 192, 192, 1)',
+            pointBorderWidth: 2,
+            pointRadius: 5, // Points visibles pour chaque valeur
+            tension: 0.3 // Courbes plus fluides
+        }]
+    };
+
+    const config = {
+        type: 'line', // Utilisation d’un graphique en ligne pour un rendu plus fluide
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: 'white', // Texte blanc pour s’adapter au design sombre
+                        font: {
+                            size: 14
                         }
                     }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 10
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 10,
+                    ticks: {
+                        color: 'white'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
                     }
                 }
             }
-        };
+        }
+    };
 
-        // Créer le graphique
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        new Chart(ctx, config);
-    });
+    new Chart(ctx, config);
+});
 </script>
 
