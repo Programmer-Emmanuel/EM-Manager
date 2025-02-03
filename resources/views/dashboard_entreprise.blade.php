@@ -83,7 +83,7 @@
     const data = {
         labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
         datasets: [{
-            label: 'Performances des employés',
+            label: 'Performances et Présences des employés',
             data: [8, 7, 9, 8.5, 7.5, 8.2, 8, 7, 9, 8.5, 7.5, 9.2],
             backgroundColor: gradient, // Dégradé pour effet visuel
             borderColor: 'rgba(75, 192, 192, 1)',
