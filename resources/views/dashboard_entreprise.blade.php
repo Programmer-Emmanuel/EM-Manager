@@ -57,14 +57,63 @@
             </div>
         </section>
 
+
         <!-- Graphiques ou rapports -->
         <section>
             <h2 class="text-xl font-bold text-white mb-4">Rapports récents</h2>
             <div class="bg-slate-800 p-6 rounded-lg shadow">
-                <p class="text-slate-400">Graphique des performances ou autres rapports analytiques non disponibles.</p>
+                <canvas id="performanceChart"></canvas> <!-- Zone pour afficher le graphique -->
             </div>
         </section>
         </div>
     </main>
 
 @endsection
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Attendre que la page soit prête
+    document.addEventListener('DOMContentLoaded', function () {
+        // Données du graphique (exemple)
+        const data = {
+            labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Decembre'], // Mois
+            datasets: [{
+                label: 'Performances des employés',
+                data: [8, 7, 9, 8.5, 7.5, 8.2, 8, 7, 9, 8.5, 7.5, 8.2], // Scores de performances
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const config = {
+            type: 'bar', // Type de graphique (barres)
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return 'Score: ' + tooltipItem.raw + '/10';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10
+                    }
+                }
+            }
+        };
+
+        // Créer le graphique
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, config);
+    });
+</script>
+
