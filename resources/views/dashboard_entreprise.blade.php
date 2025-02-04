@@ -59,7 +59,7 @@
 
 
         <!-- Graphiques ou rapports -->
-        <section>
+        <section id="rapport_performance">
             <h2 class="text-xl font-bold text-white mb-4">Rapports récents</h2>
             <div class="bg-slate-800 p-6 rounded-lg shadow">
                 <canvas id="performanceChart"></canvas> <!-- Zone pour afficher le graphique -->
