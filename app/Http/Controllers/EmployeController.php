@@ -95,7 +95,7 @@ public function update_put_password(Request $request)
     
         // Récupérer les détails de l'employé
         $employeDetails = Employe::find($employe->id);
-        $entreprise = Entreprise::find($employeDetails->id_entreprise);
+        $entreprise = Entreprise::find($employeDetails->id_entreprise); 
 
 
 
