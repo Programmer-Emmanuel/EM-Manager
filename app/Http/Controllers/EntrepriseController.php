@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comptes;
 use App\Models\Conge;
 use App\Models\Employe;
 use App\Models\Entreprise;
+use App\Models\Transactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 
@@ -102,6 +105,12 @@ class EntrepriseController extends Controller{
 
         // Authentifier automatiquement l'entreprise
         Auth::login($entreprise);
+
+        //Creer le compte de l’entreprise
+        $comptes = new Comptes();
+        $comptes->entreprise_id = $entreprise->id;
+        $comptes->montant = 0;
+        $comptes->save();
 
         // Rediriger vers le tableau de bord avec l'ID haché
         return redirect()->route('dashboard_entreprise');
@@ -357,5 +366,139 @@ public function approuver($id)
         // Rediriger avec un message de succès
         return redirect()->back()->with('success', 'La demande de congé a été rejetée.');
     }
+
+    public function comptes(){
+        // Récupérer l'entreprise connectée
+        $entreprise = Auth::user();
+
+        // Récupérer les détails de l'entreprise
+        $entrepriseDetails = Entreprise::find($entreprise->id);
+
+        //Récupérer le compte de l’entreprise
+        $comptes = Comptes::where('entreprise_id', $entreprise->id)->first();
+
+        //Récupérer les transactions
+        $transactions = Transactions::where('entreprise_id', $entreprise->id)->orderBy('created_at', 'desc')->get();
+
+        return view('comptes', compact('entrepriseDetails', 'comptes', 'transactions'));
+    }
+
+    public function transactions(){
+        // Récupérer l'entreprise connectée
+        $entreprise = Auth::user();
+
+        // Récupérer les détails de l'entreprise
+        $entrepriseDetails = Entreprise::find($entreprise->id);
+
+        return view('ajout_transaction', compact('entrepriseDetails'));
+    }
+
+    public function transactionsPost(Request $request){
+
+        //entreprise connecté
+        $entreprise = Auth::user();
+
+        $request->validate([
+            'motif' => 'required|string|max:255',
+            'type' => 'required|in:Achat,Vente',
+            'montant' => 'required|numeric|min:1',
+        ], [
+            'motif.required' => 'Le champ motif est obligatoire.',
+            'motif.string' => 'Le motif doit être une chaîne de caractères.',
+            'motif.max' => 'Le motif ne doit pas dépasser 255 caractères.',
+
+            'type.required' => 'Le type de transaction est obligatoire.',
+            'type.in' => 'Le type doit être soit Achat, soit Vente.',
+
+            'montant.required' => 'Le montant est obligatoire.',
+            'montant.numeric' => 'Le montant doit être un nombre.',
+            'montant.min' => 'Le montant doit être supérieur à 0.',
+        ]);
+
+        $transaction = new Transactions();
+        $transaction->motif = $request->motif;
+        $transaction->type = $request->type;
+        $transaction->montant = $request->montant;
+        $transaction->entreprise_id = $entreprise->id;
+        $transaction->save();
+
+
+        //Mise à jour du compte
+        $comptes = Comptes::where('entreprise_id', $entreprise->id)->first();
+        if($request->type == 'Achat'){
+            $comptes->montant -= $transaction->montant;
+        }
+        else{
+            $comptes->montant += $transaction->montant;
+        }
+        $comptes->save();
+
+        return redirect()->route('comptes');
+    }    
+
+
+    public function afficherConseils()
+{
+    // Récupérer l'entreprise connectée
+    $entreprise = Auth::user();
+
+    // Récupérer les détails de l'entreprise
+    $entrepriseDetails = Entreprise::find($entreprise->id);
+
+    // Récupération des transactions
+    $transactions = Transactions::orderByDesc('created_at')->take(10)->get();
+
+    // Construction du prompt
+    $prompt = "Voici l’historique des transactions d’une entreprise (type: Achat ou Vente, montant, date):\n";
+
+    foreach ($transactions as $t) {
+        $prompt .= "- {$t->type} de " . number_format($t->montant, 0, ',', ' ') . " FCFA le " . $t->created_at->format('d/m/Y') . "\n";
+    }
+
+    $prompt .= "\nDonne 3 conseils financiers simples en français uniquement à cette entreprise. Réponds directement avec les conseils uniquement, sans introduction ni explication.";
+
+    // Appel de l'API OpenRouter
+    $response = Http::withHeaders([
+        'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+        'Content-Type' => 'application/json',
+    ])->post('https://openrouter.ai/api/v1/chat/completions', [
+        'model' => 'microsoft/phi-4-reasoning-plus:free',
+        'messages' => [
+            ['role' => 'user', 'content' => $prompt]
+        ],
+        'temperature' => 0.7
+    ]);
+
+    if ($response->successful()) {
+        $contenu = $response->json('choices.0.message.content');
+
+        // Extraire toutes les lignes commençant par un nombre suivi d'un point (ex: 1. xxx)
+        preg_match_all('/^\d+\.\s*(.+)$/m', $contenu, $matches);
+
+        if (!empty($matches[1])) {
+            // Renumérotation des conseils avec saut de ligne entre chaque
+            $conseilsRenumerotes = [];
+            foreach ($matches[1] as $index => $texte) {
+                $numero = $index + 1;
+                $conseilsRenumerotes[] = $numero . '. ' . trim($texte);
+            }
+            // On ajoute un saut de ligne entre chaque conseil
+            $conseils = implode("\n\n", $conseilsRenumerotes);
+        } else {
+            $conseils = 'Aucun conseil exploitable n’a été trouvé.';
+        }
+    } else {
+        $conseils = 'Aucun conseil généré. Veuillez vérifier votre connexion ou votre clé API.';
+    }
+
+    return view('conseils', [
+        'conseils' => $conseils,
+        'entrepriseDetails' => $entrepriseDetails
+    ]);
+}
+
+
+
+
 
 }

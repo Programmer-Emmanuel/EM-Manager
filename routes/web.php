@@ -36,8 +36,13 @@ Route::get('/entreprise/employe/{encryptedId}/edit', [EntrepriseController::clas
 Route::put('/entreprise/employe/{encryptedId}', [EntrepriseController::class, 'update_employe'])->name('update_employe')->middleware('entreprise');
 Route::delete('/entreprise/employe/{hashedId}', [EntrepriseController::class, 'destroy_employe'])->name('destroy_employe')->middleware('entreprise');
 Route::get('/entreprise/gestion/conge', [EntrepriseController::class,'gestion_conge'])->name('gestion_conge')->middleware('entreprise');
-Route::patch('/conge/{id}/approuver', [EntrepriseController::class, 'approuver'])->name('conge_approuver');
-Route::patch('/conge/{id}/rejeter', [EntrepriseController::class, 'rejeter'])->name('conge_rejeter');
+Route::patch('/conge/{id}/approuver', [EntrepriseController::class, 'approuver'])->name('conge_approuver')->middleware('entreprise');
+Route::patch('/conge/{id}/rejeter', [EntrepriseController::class, 'rejeter'])->name('conge_rejeter')->middleware('entreprise');
+Route::get('/entreprise/comptes', [EntrepriseController::class, 'comptes'])->name('comptes')->middleware('entreprise');
+Route::get('/entreprise/transactions', [EntrepriseController::class, 'transactions'])->name('transactions')->middleware('entreprise');
+Route::post('/entreprise/transactions', [EntrepriseController::class, 'transactionsPost'])->name('transactionsPost')->middleware('entreprise');
+Route::get('/analyse/conseils', [EntrepriseController::class, 'afficherConseils'])->name('analyse_conseils')->middleware('entreprise');
+
 Route::get('/entreprise/protected', [EntrepriseController::class, 'entreprise_protect'])->name('entreprise_protect');
 
 Route::get('/employe/dashboard', [EmployeController::class, 'employe_dashboard'])->name('employe_dashboard')->middleware('employe');
