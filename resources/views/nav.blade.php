@@ -1,75 +1,148 @@
 <style>
+    /* Animation du menu mobile */
     #mobile-menu {
-        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        max-height: 0;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+        transform: translateY(-20px);
         opacity: 0;
-        overflow: hidden;
+        pointer-events: none;
     }
 
     #mobile-menu.active {
-        max-height: 500px; /* Ajustez cette valeur selon le contenu */
+        transform: translateY(0);
         opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Animation des icônes */
+    .menu-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .menu-icon.active {
+        transform: rotate(180deg);
+    }
+
+    /* Effet de soulignement des liens */
+    .nav-link {
+        position: relative;
+    }
+
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: currentColor;
+        transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+        width: 100%;
+    }
+
+    /* Bouton avec effet de remplissage */
+    .fill-btn {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .fill-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: width 0.3s ease;
+        z-index: -1;
+    }
+
+    .fill-btn:hover::before {
+        width: 100%;
     }
 </style>
 
-<nav class="bg-gray-800 sticky top-0 z-10">
-    <div class="flex items-center justify-between h-16 px-4 sm:px-6">
+<nav class="bg-slate-900 sticky top-0 z-[1000] shadow-lg border-b border-slate-700/50 backdrop-blur-sm bg-opacity-90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <div class="flex-shrink-0 flex items-center">
+                <a href="{{ route('accueil') }}" class="flex items-center group">
+                    <img class="h-8 w-8 rounded-full group-hover:rotate-12 transition-transform" src="/images/management.png" alt="EM-Manager">
+                    <span class="ml-3 text-xl font-bold text-white group-hover:text-indigo-300 transition-colors">EM-Manager</span>
+                </a>
+            </div>
 
-        <div class="flex items-center">
-            <a href="{{ route('accueil') }}" class="flex items-center">
-                <img class="h-8 w-8 rounded-full" src="/images/management.png" alt="Em-Manager">
-                <span class="ml-3 text-xl font-bold text-white">EM-Manager</span>
-            </a>
-        </div>
+            <!-- Menu Desktop -->
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-center space-x-8">
+                    <a href="{{ route('accueil') }}" class="nav-link text-sm font-medium text-white hover:text-indigo-300">Accueil</a>
+                    <a href="{{ route('apropos') }}" class="nav-link text-sm font-medium text-white hover:text-indigo-300">À propos</a>
+                    <a href="{{ route('service') }}" class="nav-link text-sm font-medium text-white hover:text-indigo-300">Services</a>
+                    <a href="{{ route('contact') }}" class="nav-link text-sm font-medium text-white hover:text-indigo-300">Contact</a>
+                    
+                    @if(Auth::guard('employe')->check() || Auth::check())
+                        <a href="#" 
+                           onclick="confirmLogout(event, '/logout')" 
+                           class="fill-btn px-4 py-2 rounded-md text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 border border-slate-700">
+                           Déconnexion
+                        </a>
+                    @else
+                        <div class="flex items-center space-x-4">
+                            <a href="{{route('login')}}" class="fill-btn px-4 py-2 rounded-md text-sm font-medium text-white hover:bg-white hover:bg-opacity-10">
+                                Connexion
+                            </a>
+                            <a href="{{route('register')}}" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-md">
+                                Inscription
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
 
-        <div class="sm:hidden">
-            <button id="menu-toggle" class="text-white focus:outline-none">
-                <svg id="burger-icon" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-                <svg id="cross-icon" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="hidden sm:block">
-            <div class="flex space-x-4 items-center">
-                <a href="{{ route('accueil') }}" class="text-sm font-medium text-white hover:text-gray-300">Accueil</a>
-                <a href="{{ route('apropos') }}" class="text-sm font-medium text-white hover:text-gray-300">À propos</a>
-                <a href="{{ route('service') }}" class="text-sm font-medium text-white hover:text-gray-300">Services</a>
-                <a href="{{ route('contact') }}" class="text-sm font-medium text-white hover:text-gray-300">Contact</a>
-                @if(Auth::guard('employe')->check() || Auth::check())
-                    <a href="#" 
-                       onclick="confirmLogout(event, '/logout')" 
-                       class="bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2">
-                       Déconnexion
-                    </a>
-                @else
-                    <a href="{{route('login')}}" class="bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2">Connexion</a>
-                    <a href="{{route('register')}}" class="ml-4 bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2">Inscription</a>
-                @endif
+            <!-- Bouton Mobile -->
+            <div class="md:hidden flex items-center">
+                <button id="menu-toggle" class="text-white focus:outline-none">
+                    <svg id="burger-icon" class="menu-icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="cross-icon" class="menu-icon h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="mobile-menu" class="hidden bg-gray-800 sm:hidden border-t-[1px] border-gray">
-        <div class="flex flex-col space-y-2 px-4 py-2 text-right">
-            <a href="{{ route('accueil') }}" class="text-sm font-medium text-white hover:text-gray-300">Accueil</a><hr>
-            <a href="{{ route('apropos') }}" class="text-sm font-medium text-white hover:text-gray-300">À propos</a><hr>
-            <a href="{{ route('service') }}" class="text-sm font-medium text-white hover:text-gray-300">Services</a><hr>
-            <a href="{{ route('contact') }}" class="text-sm font-medium text-white hover:text-gray-300">Contact</a><hr>
-            <div class="flex justify-end">
-            @if(Auth::guard('employe')->check() || Auth::check())
-                <a href="#" 
-                   onclick="confirmLogout(event, '/logout')" 
-                   class="bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2 text-center" style="width: 100px;">
-                   Déconnexion
-                </a>
-            @else
-                <a href="{{route('login')}}" class="bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2 text-center" style="width: 100px; margin-right: 5px;"> Connexion</a><hr>
-                <a href="{{route('register')}}" class="bg-white rounded-md text-sm font-medium text-gray-800 hover:bg-gray-200 hover:text-gray-900 p-2 text-center" style="width: 100px;">Inscription</a>
-            @endif
+    <!-- Menu Mobile -->
+    <div id="mobile-menu" class="md:hidden absolute w-full bg-slate-900 border-t border-slate-700 shadow-xl">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <a href="{{ route('accueil') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-slate-800">Accueil</a>
+            <a href="{{ route('apropos') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-slate-800">À propos</a>
+            <a href="{{ route('service') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-slate-800">Services</a>
+            <a href="{{ route('contact') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-slate-800">Contact</a>
+            
+            <div class="pt-2 border-t border-slate-800">
+                @if(Auth::guard('employe')->check() || Auth::check())
+                    <a href="#" 
+                       onclick="confirmLogout(event, '/logout')" 
+                       class="block w-full px-3 py-2 rounded-md text-base font-medium text-white bg-slate-800 hover:bg-slate-700 text-center">
+                       Déconnexion
+                    </a>
+                @else
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="{{route('login')}}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-slate-800 text-center border border-slate-700">
+                            Connexion
+                        </a>
+                        <a href="{{route('register')}}" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 text-center">
+                            Inscription
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -77,10 +150,9 @@
 
 <script>
     function confirmLogout(event, logoutUrl) {
-        event.preventDefault(); // Empêche le comportement par défaut du lien
+        event.preventDefault();
         const userConfirmed = confirm("Êtes-vous sûr de vouloir vous déconnecter ?");
         if (userConfirmed) {
-            // Redirige vers la route de déconnexion
             window.location.href = logoutUrl;
         }
     }
@@ -90,37 +162,46 @@
         const mobileMenu = document.getElementById('mobile-menu');
         const burgerIcon = document.getElementById('burger-icon');
         const crossIcon = document.getElementById('cross-icon');
-        const menuLinks = mobileMenu.querySelectorAll('a'); // Sélectionne tous les liens du menu mobile
+        const menuLinks = mobileMenu.querySelectorAll('a');
 
-        // Fonction pour afficher/masquer le menu
         const toggleMenu = () => {
             const isActive = mobileMenu.classList.contains('active');
-
+            
             if (isActive) {
-                // Cache le menu
                 mobileMenu.classList.remove('active');
-                setTimeout(() => mobileMenu.classList.add('hidden'), 300);
+                // Désactive le scroll lock après l'animation
+                setTimeout(() => {
+                    document.body.style.overflow = '';
+                }, 300);
             } else {
-                // Affiche le menu
-                mobileMenu.classList.remove('hidden');
-                setTimeout(() => mobileMenu.classList.add('active'), 10);
+                mobileMenu.classList.add('active');
+                // Empêche le défilement de la page lorsque le menu est ouvert
+                document.body.style.overflow = 'hidden';
             }
 
-            // Alterne entre les icônes burger et croix
             burgerIcon.classList.toggle('hidden');
             crossIcon.classList.toggle('hidden');
+            burgerIcon.classList.toggle('active');
+            crossIcon.classList.toggle('active');
         };
 
-        // Gestion du clic sur le bouton pour ouvrir/fermer le menu
         menuToggle.addEventListener('click', toggleMenu);
 
-        // Gestion du clic sur un lien du menu pour fermer le menu
         menuLinks.forEach(link => {
             link.addEventListener('click', () => {
                 if (mobileMenu.classList.contains('active')) {
                     toggleMenu();
                 }
             });
+        });
+
+        // Ferme le menu si on clique à l'extérieur
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                if (mobileMenu.classList.contains('active')) {
+                    toggleMenu();
+                }
+            }
         });
     });
 </script>

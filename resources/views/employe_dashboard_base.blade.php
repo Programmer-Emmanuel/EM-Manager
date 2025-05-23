@@ -113,10 +113,6 @@
     </div>
 
 
-    <!--Footer-->
-    @include('footer')
-
-
     <!-- Chargement de la page avec loading spinner -->
     @include('loading')
 
