@@ -1,4 +1,4 @@
-
+<script src="https://cdn.tailwindcss.com"></script>
   <style>
     #loading {
       position: fixed;
@@ -8,6 +8,7 @@
       height: 100%;
       background-color: rgba(38, 38, 38, 0.63);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 9999;
@@ -33,7 +34,8 @@
   </style>
 
   <div id="loading">
-    <div class="spinner"></div>
+    <div class="spinner"></div><br>
+    <p class="text-white"> Chargement...</p>
   </div>
 
   <script>

@@ -112,7 +112,7 @@
                 </div>
                 <div class="lg:w-1/2 relative" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
                     <div class="floating relative z-8">
-                        <img src="/images/accueil.jpeg" alt="Dashboard EM-Manager" class="rounded-xl shadow-2xl glow border border-slate-700/50 w-full max-w-2xl mx-auto">
+                        <img src="/images/accueil.jpeg" alt="Dashboard EM-Manager" class="rounded-xl shadow-2xl glow border border-slate-700/50 h-[600px] w-full max-w-2xl mx-auto">
                     </div>
                     <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob"></div>
                     <div class="absolute -top-10 -right-10 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-2xl opacity-20 animate-blob animation-delay-2000"></div>

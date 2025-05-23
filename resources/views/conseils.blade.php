@@ -2,7 +2,7 @@
 
 @section('main')
 <main class="flex-1 overflow-hidden relative bg-gradient-to-br from-slate-900 to-slate-800">
-    <div class="absolute inset-0 overflow-y-auto hide-scroll p-6">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-2">
         <div class="min-h-screen flex items-center justify-center px-4">
             <div class="max-w-4xl w-full space-y-8 animate-fade-in">
                 <!-- En-tête avec animation -->
@@ -13,7 +13,7 @@
                         </div>
                     </div>
                     <div>
-                        <h1 class="text-3xl font-bold text-white">Conseils IA pour votre entreprise</h1>
+                        <h1 class="text-3xl font-bold text-white">ManagerAI, l’IA qui vous guide dans la gestion de votre entreprise.</h1>
                         <p class="text-slate-400">Optimisations basées sur vos données</p>
                     </div>
                 </div>

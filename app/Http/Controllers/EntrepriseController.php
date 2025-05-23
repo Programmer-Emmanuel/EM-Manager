@@ -400,7 +400,7 @@ public function approuver($id)
 
         $request->validate([
             'motif' => 'required|string|max:255',
-            'type' => 'required|in:Achat,Vente',
+            'type' => 'required|in:Entrée,Sortie',
             'montant' => 'required|numeric|min:1',
         ], [
             'motif.required' => 'Le champ motif est obligatoire.',
@@ -408,7 +408,7 @@ public function approuver($id)
             'motif.max' => 'Le motif ne doit pas dépasser 255 caractères.',
 
             'type.required' => 'Le type de transaction est obligatoire.',
-            'type.in' => 'Le type doit être soit Achat, soit Vente.',
+            'type.in' => 'Le type doit être soit Entrée, soit Sortie.',
 
             'montant.required' => 'Le montant est obligatoire.',
             'montant.numeric' => 'Le montant doit être un nombre.',
@@ -425,7 +425,7 @@ public function approuver($id)
 
         //Mise à jour du compte
         $comptes = Comptes::where('entreprise_id', $entreprise->id)->first();
-        if($request->type == 'Achat'){
+        if($request->type == 'Sortie'){
             $comptes->montant -= $transaction->montant;
         }
         else{
@@ -449,7 +449,7 @@ public function approuver($id)
     $transactions = Transactions::orderByDesc('created_at')->take(10)->get();
 
     // Construction du prompt
-    $prompt = "Voici l’historique des transactions d’une entreprise (type: Achat ou Vente, montant, date):\n";
+    $prompt = "Voici l’historique des transactions d’une entreprise (type: Entrée ou Sortie, montant, date):\n";
 
     foreach ($transactions as $t) {
         $prompt .= "- {$t->type} de " . number_format($t->montant, 0, ',', ' ') . " FCFA le " . $t->created_at->format('d/m/Y') . "\n";

@@ -1,81 +1,95 @@
 @extends('dashboard_base')
 
 @section('main')
-<main class="flex-1 p-8 bg-slate-900 text-white shadow-md overflow-hidden relative">
-<div class="absolute inset-0 overflow-y-auto hide-scroll p-5 ">
-    <!-- Titre principal -->
-    <header class="mb-8">
-        <h1 class="text-2xl font-bold text-white">Gestion des Employés</h1>
-        <p class="text-slate-400 italic">Visualisez, gérez et mettez à jour les informations des employés de votre entreprise.</p>
-    </header>
-
-    <!-- Actions rapides -->
-    <section class="mb-8">
-        <h2 class="text-xl font-bold mb-4 underline">Actions rapides</h2>
-        <div class="flex m-auto flex-wrap gap-4 items-center">
-            <a href="{{ route('ajout_employe') }}" 
-                class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow hover:bg-slate-700 transition w-56">
-                <i class="fas fa-user-plus"></i> Ajouter un Employé
-            </a>
-            <a href="{{ route('export_employe') }}" 
-                class="bg-slate-800 text-white px-6 py-3 rounded-lg shadow hover:bg-slate-700 transition w-56">
-                <i class="fas fa-file-export"></i> Exporter la Liste
-            </a>
-
+<main class="flex-1 p-6 bg-slate-900 text-white overflow-hidden relative">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll">
+        <!-- Header avec titre et boutons d'action -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 p-4 bg-slate-800 rounded-lg shadow">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-2xl font-bold text-white">Gestion des Employés</h1>
+                <p class="text-slate-400">Gérez efficacement votre équipe</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('ajout_employe') }}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Ajouter</span>
+                </a>
+                <a href="{{ route('export_employe') }}" 
+                   class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                    <i class="fas fa-file-export"></i>
+                    <span>Exporter</span>
+                </a>
+            </div>
         </div>
-    </section>
 
-    <!-- Liste des employés -->
-    <section>
-        <h2 class="text-xl font-bold mb-4">Liste des Employés</h2>
-        <div class="overflow-x-auto bg-slate-800 p-6 rounded-lg shadow-md">
-            <table class="min-w-full table-auto border-collapse border border-slate-700">
-                <thead class="bg-slate-700 text-slate-300">
-                    <tr>
-                        <th class="px-2 py-1 border border-slate-600 text-sm" style="width: 200px;">Nom complet</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Matricule</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Email</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Telephone</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Poste</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Département</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm">Date d’embauche</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm" style="width: 100px;">Salaire employé</th>
-                        <th class="px-2 py-1 border border-slate-600 text-sm" style="width: 150px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($employes as $employe)
-                    <tr>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->nom_employe }} {{ $employe->prenom_employe }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->matricule_employe }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->email_employe }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->telephone }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->poste }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->departement }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">{{ $employe->date_embauche }}</td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic text-center">
-                        {{ number_format($employe->salaire, 0, ',', ' ') }} F
-                        </td>
-                        <td class="px-2 py-1 border border-slate-600 text-xs italic">
-                        <a href="{{ route('edit_employe', Crypt::encrypt($employe->id)) }}" class="text-yellow-500 hover:text-yellow-700 font-bold">
-                            <i class="fas fa-edit"></i> Modifier
-                        </a>
-
-                            <form action="{{ route('destroy_employe', Crypt::encryptString($employe->id)) }}" method="POST" class="inline-block" onsubmit="return confirmDelete()" style="margin-top: 10px;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700 italic font-bold">
-                                    <i class="fas fa-trash"></i> Supprimer
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <!-- Tableau des employés -->
+        <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden m-6">
+            <div class="overflow-x-auto hide-scroll">
+                <table class="w-full">
+                    <thead class="bg-slate-700 text-slate-300">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Nom complet</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Matricule</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Poste</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Département</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Contact</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Salaire</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        @foreach($employes as $employe)
+                        <tr class="hover:bg-slate-750 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-slate-600 rounded-full flex items-center justify-center">
+                                        <span class="text-sm font-medium">{{ substr($employe->prenom_employe, 0, 1) }}{{ substr($employe->nom_employe, 0, 1) }}</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium">{{ $employe->prenom_employe }} {{ $employe->nom_employe }}</div>
+                                        <div class="text-xs text-slate-400">{{ $employe->email_employe }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $employe->matricule_employe }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $employe->poste }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $employe->departement }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <div class="text-sm">{{ $employe->telephone }}</div>
+                                <div class="text-xs text-slate-400">{{ $employe->email_employe }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                                {{ number_format($employe->salaire, 0, ',', ' ') }} F
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-3">
+                                    <a href="{{ route('edit_employe', Crypt::encrypt($employe->id)) }}" 
+                                       class="text-blue-400 hover:text-blue-300 transition-colors"
+                                       title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('destroy_employe', Crypt::encryptString($employe->id)) }}" 
+                                          method="POST" 
+                                          onsubmit="return confirmDelete()"
+                                          class="inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="text-red-400 hover:text-red-300 transition-colors"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </section>
-</div>
+    </div>
 </main>
 
 <script>

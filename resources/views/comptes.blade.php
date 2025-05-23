@@ -1,76 +1,124 @@
 @extends('dashboard_base')
 
 @section('main')
-    <main class="flex-1 p-8 bg-slate-900 text-white shadow-md overflow-hidden relative">
-        <div class="absolute inset-0 overflow-y-auto hide-scroll p-5 ">
-            <h1 class="text-3xl font-bold">Bienvenue sur votre l’historique de vos transactions</h1>
-        <p class="text-md text-slate-500 italic">Ici vous verrez combien vous avez dépensé, votre revenus et l’historique de vos transactions.</p>
-        <div class="flex flex-wrap justify-between items-center">
-            @php
-                $montant = $comptes->first()->montant ?? null;
-                if ($montant === null) {
-                    $colorClass = ''; // pas de couleur si non dispo
-                } elseif ($montant < 0) {
-                    $colorClass = 'text-red-500'; // rouge
-                    $texte = "Vous n’avez pas un bon revenu. Vous perdez de l’argent !";
-                } elseif ($montant == 0) {
-                    $colorClass = 'text-white';   // blanc
-                    $texte = "";
-                } else {
-                    $colorClass = 'text-green-500'; // vert
-                    $texte = "Vous avez un bon bénéfice. Vous gagnez de l’argent !";
-                }
-            @endphp
+<main class="flex-1 bg-slate-900 text-white shadow-md overflow-hidden relative">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-5">
+        <div class="inset-0 overflow-y-auto hide-scroll p-5 ">
+        <!-- En-tête -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Historique de vos transactions</h1>
+            <p class="text-slate-400 italic">Consultez vos dépenses, revenus et l'historique complet de vos transactions.</p>
+        </div>
 
-            <h1 class="text-2xl mt-5 font-semibold text-white bg-slate-800 px-4 py-2 rounded-lg shadow-md inline-block">
-                <span class=" font-bold mr-2">Bénéfice du compte:</span>
-                <span class="{{ $colorClass }}">
-                    {{ $montant !== null ? number_format($montant, 0, ',', ' ') : 'Non disponible' }} FCFA
-                </span>
-            </h1>
+        <!-- Statistiques et actions -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+            <!-- Bénéfice du compte -->
+            <div class="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700/50 shadow-md">
+                @php
+                    $montant = $comptes->first()->montant ?? null;
+                    if ($montant === null) {
+                        $colorClass = 'text-slate-400';
+                        $texte = "Aucune donnée disponible";
+                    } elseif ($montant < 0) {
+                        $colorClass = 'text-red-400';
+                        $texte = "Attention : votre solde est négatif";
+                    } elseif ($montant == 0) {
+                        $colorClass = 'text-slate-300';
+                        $texte = "Votre solde est neutre";
+                    } else {
+                        $colorClass = 'text-green-400';
+                        $texte = "Excellent ! Votre solde est positif";
+                    }
+                @endphp
 
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-slate-700 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-400">Bénéfice du compte</p>
+                        <p class="text-xl font-bold {{ $colorClass }}">
+                            {{ $montant !== null ? number_format($montant, 0, ',', ' ') . ' FCFA' : 'N/A' }}
+                        </p>
+                    </div>
+                </div>
+                <p class="mt-2 text-sm {{ $colorClass }} italic">{{ $texte }}</p>
+            </div>
 
-            <a href="{{ route('transactions')}}" class="bg-slate-800 hover:bg-slate-950 p-2 rounded-full flex items-center gap-2 mt-5">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+            <!-- Bouton Ajouter -->
+            <a href="{{ route('transactions') }}" class="flex items-center gap-2 bg-gradient-to-r from-slate-700/50 to-slate-800/50 hover:from-slate-700 hover:to-slate-800 text-white px-4 py-3 rounded-lg border border-slate-700/50 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                <p>Ajouter une transaction</p>
+                Nouvelle transaction
             </a>
         </div>
-        <p class="text-slate-500 italic">{{$texte}}</p>
-        <div class="mt-8 space-y-3">
-            @foreach ($transactions as $transaction)
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg border
-                    @if($transaction->type == 'Achat') border-red-600 bg-red-900 text-red-100
-                    @elseif($transaction->type == 'Vente') border-green-600 bg-green-900 text-green-100
-                    @else border-gray-600 bg-slate-800 text-white
-                    @endif
-                    shadow-sm
-                ">
-                    <span class="flex-1 font-semibold text-lg mb-1 sm:mb-0">{{ $transaction->motif }}</span>
 
-                    <span class="sm:w-24 text-center font-semibold uppercase tracking-wide mb-1 sm:mb-0">
-                        @if($transaction->type == 'Achat')
-                            Achat
-                        @elseif($transaction->type == 'Vente')
-                            Vente
-                        @else
+        <!-- Liste des transactions -->
+        <div class="space-y-3">
+            @forelse ($transactions as $transaction)
+                <div class="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border border-slate-700/50 bg-slate-800/30 hover:bg-slate-800/50 backdrop-blur-sm transition-all duration-200">
+                    <div class="flex-1 flex items-center gap-3 mb-2 sm:mb-0">
+                        <div class="p-2 rounded-lg 
+                            @if($transaction->type == 'Sortie') bg-red-900/30 border border-red-800/50
+                            @elseif($transaction->type == 'Entrée') bg-green-900/30 border border-green-800/50
+                            @else bg-slate-700/30 border border-slate-700/50
+                            @endif">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 
+                                @if($transaction->type == 'Sortie') text-red-400
+                                @elseif($transaction->type == 'Entrée') text-green-400
+                                @else text-slate-400
+                                @endif" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                @if($transaction->type == 'Sortie')
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                @elseif($transaction->type == 'Entrée')
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                @else
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                @endif
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white">{{ $transaction->motif }}</p>
+                            <p class="text-xs text-slate-400">{{ $transaction->created_at->format('d/m/Y H:i') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                            @if($transaction->type == 'Sortie') bg-red-900/30 text-red-400
+                            @elseif($transaction->type == 'Entrée') bg-green-900/30 text-green-400
+                            @else bg-slate-700/30 text-slate-400
+                            @endif">
                             {{ $transaction->type }}
-                        @endif
-                    </span>
-
-                    <span class="sm:w-36 text-right font-bold text-lg">{{ number_format($transaction->montant, 0, ',', ' ') }} FCFA</span>
-
-                    <span class="sm:w-44 text-right text-sm text-slate-300 mt-1 sm:mt-0 font-semibold">{{ $transaction->created_at->format('d/m/Y H:i') }}</span>
+                        </span>
+                        
+                        <span class="font-bold 
+                            @if($transaction->type == 'Sortie') text-red-400
+                            @elseif($transaction->type == 'Entrée') text-green-400
+                            @else text-white
+                            @endif">
+                            {{ number_format($transaction->montant, 0, ',', ' ') }} FCFA
+                        </span>
+                    </div>
                 </div>
-            @endforeach
-
-            @if ($transactions->isEmpty())
-                <p class="italic text-slate-500 mt-4">Aucune transaction pour le moment.</p>
-            @endif
+            @empty
+                <div class="text-center py-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="mt-2 text-slate-400">Aucune transaction enregistrée</p>
+                    <a href="{{ route('transactions') }}" class="mt-4 inline-block text-slate-300 hover:text-white underline">Ajouter une transaction</a>
+                </div>
+            @endforelse
         </div>
+    </div>
+    </div>
 
-        </div>
-
-    </main>
+    <!-- Effets décoratifs -->
+    <div class="fixed -bottom-32 -left-32 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5"></div>
+    <div class="fixed -top-32 -right-32 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5"></div>
+</main>
 @endsection
