@@ -85,7 +85,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 overflow-hidden">
     <!-- Barre de navigation : nav.blade.php -->
     @include('nav')
 

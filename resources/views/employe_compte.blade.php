@@ -32,8 +32,8 @@
     }
 </style>
 
-<main class="flex-1 overflow-y-auto hide-scroll bg-gradient-to-br from-slate-900 to-slate-800">
-    <div class="inset-0 overflow-y-auto hide-scroll p-6">
+<main class="flex-1 p-6 bg-slate-900 text-white overflow-hidden relative">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll px-4 py-6">
         <div class="w-full max-w-3xl mx-auto my-8">
             <!-- Carte de profil -->
             <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl overflow-hidden" data-aos="fade-in">

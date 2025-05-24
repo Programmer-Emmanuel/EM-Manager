@@ -1,8 +1,8 @@
 @extends('employe_dashboard_base')
 
 @section('main')
-<main class="flex-1 bg-slate-900 text-white shadow-md overflow-hidden relative">
-    <div class="absolute inset-0 overflow-y-auto p-6">
+<main class="flex-1 bg-slate-900 text-white overflow-hidden relative">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-6">
         <!-- En-tête -->
         <div class="mb-8">
             <h1 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">

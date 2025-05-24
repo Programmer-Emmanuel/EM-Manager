@@ -1,8 +1,8 @@
 @extends('employe_dashboard_base')
 
 @section('main')
-<main class="flex-1 overflow-y-auto hide-scroll bg-gradient-to-br from-slate-900 to-slate-800">
-    <div class="inset-0 min-h-screen flex items-center justify-center overflow-y-auto hide-scroll p-6">
+<main class="flex-1 bg-slate-900 text-white overflow-hidden relative mt-10">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-5">
         <div class="w-full max-w-md mx-auto">
             <!-- Carte du formulaire -->
             <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl overflow-hidden" data-aos="fade-in">

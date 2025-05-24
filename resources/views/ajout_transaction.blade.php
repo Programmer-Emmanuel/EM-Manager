@@ -2,8 +2,8 @@
 @include('aos')
 
 @section('main')
-<main class="flex-1 overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800">
-    <div class="flex items-center justify-center min-h-screen p-6">
+<main class="flex-1 bg-slate-900 text-white overflow-hidden relative">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-5">
         <div class="w-full max-w-md mx-auto">
             <!-- Carte du formulaire -->
             <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl overflow-hidden" data-aos="zoom-in" data-aos-duration="500">

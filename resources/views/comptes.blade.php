@@ -1,7 +1,7 @@
 @extends('dashboard_base')
 
 @section('main')
-<main class="flex-1 bg-slate-900 text-white shadow-md overflow-hidden relative">
+<main class="flex-1 bg-slate-900 text-white overflow-hidden relative">
     <div class="absolute inset-0 overflow-y-auto hide-scroll p-5">
         <div class="inset-0 overflow-y-auto hide-scroll p-5 ">
         <!-- En-tête -->
