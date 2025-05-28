@@ -1,7 +1,7 @@
 @extends('dashboard_base')
 
 @section('main')
-<main class="flex-1 overflow-hidden relative bg-gradient-to-br from-slate-900 to-slate-800">
+<main class="flex-1 overflow-hidden relative bg-slate-900">
     <div class="absolute inset-0 overflow-y-auto hide-scroll p-2">
         <div class="min-h-screen flex items-center justify-center px-4">
             <div class="max-w-4xl w-full space-y-8 animate-fade-in">
@@ -19,7 +19,7 @@
                 </div>
 
                 <!-- Carte des conseils -->
-                <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden shadow-2xl" data-aos="fade-up">
+                <div class="bg-slate-800 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden" data-aos="fade-up">
                     <!-- En-tête de la carte -->
                     <div class="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-4 border-b border-slate-700/50">
                         <div class="flex items-center justify-between">
