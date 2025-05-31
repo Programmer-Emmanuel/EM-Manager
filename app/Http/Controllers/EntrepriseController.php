@@ -10,6 +10,7 @@ use App\Models\Transactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -145,9 +146,30 @@ class EntrepriseController extends Controller{
         $count_employe = Employe::where('id_entreprise', '=', $entreprise->id)->count();
 
         $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+        
+        $transactions = Transactions::where('entreprise_id', $entreprise->id)->get();
 
-        // Afficher la vue du tableau de bord
-        return view('dashboard_entreprise', compact('entrepriseDetails','count_employe','count_conge'));
+
+        $transactionsParMois = Transactions::select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
+                DB::raw("SUM(montant) as total")
+            )
+            ->groupBy('mois')
+            ->orderBy('mois')
+            ->get();
+
+        // On sépare mois et montants pour le graphique
+        $labels = $transactionsParMois->pluck('mois');
+        $data = $transactionsParMois->pluck('total');
+
+        return view('dashboard_entreprise', compact(
+            'entrepriseDetails',
+            'count_employe',
+            'count_conge',
+            'transactions',
+            'labels',
+            'data'
+        ));
     }
 
     public function liste_employe(){

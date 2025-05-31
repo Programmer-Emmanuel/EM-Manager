@@ -1,5 +1,7 @@
 @extends('dashboard_base')
 
+
+
 @section('main')
 
     <main class="flex-1 p-6 bg-slate-900 text-white overflow-hidden relative">
@@ -114,121 +116,63 @@
             </section>
 
             <!-- Graphique avec style amélioré -->
-            <section>
-                <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
-                    <span class="w-1 h-5 bg-teal-500 rounded-full mr-2"></span>
-                    Rapports de performance
-                </h2>
-                <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50">
-                    <div class="h-80">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-            </section>
+    <section>
+        <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+            <span class="w-1 h-5 bg-teal-500 rounded-full mr-2"></span>
+            Rapports de performance
+        </h2>
+        <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700/50">
+            <div class="h-80">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
         </div>
-    </main>
+    </section>
+</div>
+</main>
 
-@endsection
+@php
+    $labelsString = $labels->join(',');  // "2023-01,2023-02,2023-03"
+    $dataString = $data->join(',');      // "1000,2500,3000"
+@endphp
 
+<!-- ✅ Chart.js script en bas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        
-        // Dégradé amélioré avec transparence
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(94, 234, 212, 0.3)');
-        gradient.addColorStop(0.7, 'rgba(94, 234, 212, 0.1)');
-        gradient.addColorStop(1, 'rgba(94, 234, 212, 0)');
+    
+    const labels = "{{ $labelsString }}".split(',');
+    const data = "{{ $dataString }}".split(',').map(Number);
 
-        const data = {
-            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'],
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
             datasets: [{
-                label: 'Performance moyenne',
-                data: [8, 7, 9, 8.5, 7.5, 8.2, 8, 7, 9, 8.5, 7.5, 9.2],
-                fill: true,
-                backgroundColor: gradient,
-                borderColor: 'rgba(94, 234, 212, 0.8)',
+                label: 'Montant des transactions (par mois)',
+                data: data,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: '#f97316',
                 borderWidth: 2,
-                pointBackgroundColor: 'rgba(94, 234, 212, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
+                fill: true,
                 tension: 0.3
             }]
-        };
-
-        const config = {
-            type: 'line',
-            data: data,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: {
-                            color: 'rgba(255, 255, 255, 0.9)',
-                            font: {
-                                size: 13,
-                                family: "'Inter', sans-serif"
-                            },
-                            padding: 20,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                        titleColor: 'rgba(255, 255, 255, 0.9)',
-                        bodyColor: 'rgba(255, 255, 255, 0.7)',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1,
-                        padding: 12,
-                        usePointStyle: true,
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y.toFixed(1) + '/10';
-                            }
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR') + ' FCFA';
                         }
                     }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.6)'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: 10,
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: 'rgba(255, 255, 255, 0.6)',
-                            callback: function(value) {
-                                return value + (value === 10 ? '' : '/10');
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
                 }
             }
-        };
-
-        new Chart(ctx, config);
+        }
     });
 </script>
+
 
 <style>
     .hide-scrollbar::-webkit-scrollbar {
@@ -239,3 +183,4 @@
         scrollbar-width: none;
     }
 </style>
+@endsection
