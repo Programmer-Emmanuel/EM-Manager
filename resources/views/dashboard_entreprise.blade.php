@@ -135,7 +135,6 @@
     $dataString = $data->join(',');      // "1000,2500,3000"
 @endphp
 
-<!-- ✅ Chart.js script en bas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     
@@ -150,8 +149,8 @@
             datasets: [{
                 label: 'Montant des transactions (par mois)',
                 data: data,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: '#f97316',
+                backgroundColor: 'rgba(144, 238, 144, 0.3)',  // vert clair transparent
+                borderColor: '#32CD32',  // vert lime
                 borderWidth: 2,
                 fill: true,
                 tension: 0.3
@@ -172,6 +171,7 @@
         }
     });
 </script>
+
 
 
 <style>
