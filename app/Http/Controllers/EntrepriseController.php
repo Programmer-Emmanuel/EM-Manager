@@ -151,7 +151,10 @@ class EntrepriseController extends Controller{
 
 
         $transactionsParMois = Transactions::select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
+                //pour postgre
+                DB::raw("to_char(created_at, 'YYYY-MM') as mois"),
+                //pour mysql
+                // DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
                 DB::raw("SUM(montant) as total")
             )
             ->groupBy('mois')
