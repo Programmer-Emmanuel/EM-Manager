@@ -125,7 +125,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span class="ml-3 hidden sm:block">Gestion des congés</span>
-                    <p class="bg-white text-slate-900 rounded-full min-w-[24px] h-[24px] px-2 text-sm flex items-center justify-center m-2">{{ $count_conge}}</p>
+                    @if ($count_conge!=0)
+                        <p class="bg-white text-slate-900 rounded-full min-w-[24px] h-[24px] px-2 text-sm flex items-center justify-center m-2">{{ $count_conge}}</p>
+                    @endif
 
                 </a>
 
