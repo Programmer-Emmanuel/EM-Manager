@@ -160,8 +160,10 @@ class EntrepriseController extends Controller{
         // Récupérer la liste des employés de l'entreprise
         $employes = Employe::where('id_entreprise', '=', $entreprise->id)->get();
 
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+
         // Afficher la vue du tableau de bord
-        return view('liste_employe', compact('entrepriseDetails', 'employes'));
+        return view('liste_employe', compact('entrepriseDetails', 'employes', 'count_conge'));
     }
 
     public function ajout_employe(){
@@ -171,8 +173,10 @@ class EntrepriseController extends Controller{
         // Récupérer les détails de l'entreprise
         $entrepriseDetails = Entreprise::find($entreprise->id);
 
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+
         // Afficher la vue du tableau de bord
-        return view('ajout_employe', compact('entrepriseDetails'));
+        return view('ajout_employe', compact('entrepriseDetails', 'count_conge'));
     }
 
     public function store_employe(Request $request){
@@ -248,7 +252,9 @@ class EntrepriseController extends Controller{
         // Récupérer l'employé
         $employe = Employe::findOrFail($id);
 
-        return view('edit_employe', compact('entrepriseDetails', 'employe'));
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+
+        return view('edit_employe', compact('entrepriseDetails', 'employe', 'count_conge'));
     } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
         abort(404, 'ID invalide ou employé introuvable');
     }
@@ -336,8 +342,10 @@ public function gestion_conge()
 
             return $conge;
         });
+        
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
 
-    return view('gestion_conge', compact('entrepriseDetails', 'conges'));
+    return view('gestion_conge', compact('entrepriseDetails', 'conges', 'count_conge'));
 }
 
 
@@ -380,7 +388,9 @@ public function approuver($id)
         //Récupérer les transactions
         $transactions = Transactions::where('entreprise_id', $entreprise->id)->orderBy('created_at', 'desc')->get();
 
-        return view('comptes', compact('entrepriseDetails', 'comptes', 'transactions'));
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+
+        return view('comptes', compact('entrepriseDetails', 'comptes', 'transactions', 'count_conge'));
     }
 
     public function transactions(){
@@ -389,8 +399,11 @@ public function approuver($id)
 
         // Récupérer les détails de l'entreprise
         $entrepriseDetails = Entreprise::find($entreprise->id);
+        
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
 
-        return view('ajout_transaction', compact('entrepriseDetails'));
+
+        return view('ajout_transaction', compact('entrepriseDetails', 'count_conge'));
     }
 
     public function transactionsPost(Request $request){
@@ -491,9 +504,12 @@ public function approuver($id)
         $conseils = 'Aucun conseil généré. Veuillez vérifier votre connexion ou votre clé API.';
     }
 
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+
     return view('conseils', [
         'conseils' => $conseils,
-        'entrepriseDetails' => $entrepriseDetails
+        'entrepriseDetails' => $entrepriseDetails,
+        'count_conge' => $count_conge
     ]);
 }
 
