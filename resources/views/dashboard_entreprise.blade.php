@@ -149,8 +149,8 @@
             datasets: [{
                 label: 'Montant des transactions (par mois)',
                 data: data,
-                backgroundColor: 'rgba(144, 238, 144, 0.3)',  // vert clair transparent
-                borderColor: '#32CD32',  // vert lime
+                backgroundColor: '#60A5FA',  // vert clair transparent
+                borderColor: '#60A5FA',  // vert lime
                 borderWidth: 2,
                 fill: true,
                 tension: 0.3
