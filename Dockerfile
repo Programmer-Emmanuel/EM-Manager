@@ -1,9 +1,10 @@
 FROM php:8.2-cli
 
-# Installer dépendances système + extensions PHP (dont GD, mbstring, exif, bcmath utiles pour Laravel)
+# Installer dépendances système + extensions PHP (GD, mbstring, exif, bcmath utiles pour Laravel)
 RUN apt-get update && apt-get install -y \
     git curl unzip sqlite3 libsqlite3-dev zip \
     libpng-dev libjpeg-dev libfreetype6-dev \
+    libonig-dev \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install pdo pdo_sqlite gd mbstring exif bcmath
 
