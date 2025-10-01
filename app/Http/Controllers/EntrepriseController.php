@@ -150,11 +150,14 @@ class EntrepriseController extends Controller{
         $transactions = Transactions::where('entreprise_id', $entreprise->id)->get();
 
 
+        $driver = DB::getDriverName();
+
+        $moisExpression = $driver === 'pgsql'
+            ? DB::raw("to_char(created_at, 'YYYY-MM') as mois")
+            : DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois");
+
         $transactionsParMois = Transactions::select(
-                //pour postgre
-                DB::raw("to_char(created_at, 'YYYY-MM') as mois"),
-                //pour mysql
-                // DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois"),
+                $moisExpression,
                 DB::raw("SUM(montant) as total")
             )
             ->groupBy('mois')
@@ -493,14 +496,14 @@ public function approuver($id)
         $prompt .= "- {$t->type} de " . number_format($t->montant, 0, ',', ' ') . " FCFA le " . $t->created_at->format('d/m/Y') . "\n";
     }
 
-    $prompt .= "\nDonne 3 conseils financiers simples en français uniquement à cette entreprise. Réponds directement avec les conseils uniquement, sans introduction ni explication.";
+    $prompt .= "\nDonne 10 conseils financiers simples en français uniquement à cette entreprise. Réponds directement avec les conseils uniquement, sans introduction ni explication.";
 
     // Appel de l'API OpenRouter
     $response = Http::withHeaders([
         'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
         'Content-Type' => 'application/json',
     ])->post('https://openrouter.ai/api/v1/chat/completions', [
-        'model' => 'microsoft/phi-4-reasoning-plus:free',
+        'model' => 'deepseek/deepseek-chat-v3.1:free',
         'messages' => [
             ['role' => 'user', 'content' => $prompt]
         ],
@@ -527,6 +530,7 @@ public function approuver($id)
         }
     } else {
         $conseils = 'Aucun conseil généré. Veuillez vérifier votre connexion ou votre clé API.';
+        echo("<script>console.log($response)</script>");
     }
 
     $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
