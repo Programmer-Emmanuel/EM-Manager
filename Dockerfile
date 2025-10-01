@@ -2,12 +2,16 @@ FROM php:8.2-cli
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Installer dépendances système nécessaires
+# Installer dépendances système pour PHP + GD + PECL
 RUN apt-get update && apt-get install -y \
     git curl unzip sqlite3 libsqlite3-dev zip \
     libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev libicu-dev zlib1g-dev g++ pkg-config \
-    php-dev libssl-dev \
-    npm nodejs \
+    php8.2-dev libssl-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Installer Node.js LTS 20.x via NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Configurer et installer extensions PHP
@@ -27,10 +31,10 @@ WORKDIR /var/www/html
 # Copier tout le projet (artisan doit exister avant composer install)
 COPY . .
 
-# Installer les dépendances PHP
+# Installer dépendances PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Installer les dépendances JS et builder Vite
+# Installer dépendances JS et builder Vite
 RUN npm install && npm run build
 
 # Droits sur storage et bootstrap/cache
@@ -38,7 +42,5 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Exposer le port Laravel
 EXPOSE 8000
-
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
