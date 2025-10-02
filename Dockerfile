@@ -15,7 +15,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 
 RUN docker-php-ext-install \
     pdo \
-    pdo_sqlite \
+    pdo_mysql \
     mbstring \
     exif \
     bcmath \
@@ -48,11 +48,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copier le reste des fichiers
 COPY . .
 
-# Créer le fichier SQLite si nécessaire
-RUN mkdir -p database \
-    && touch database/database.sqlite \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 storage bootstrap/cache database
+# Définir les permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 storage bootstrap/cache
 
 # Installer et builder les assets Node.js
 RUN npm install && npm run build
@@ -61,4 +59,5 @@ RUN npm install && npm run build
 EXPOSE 8000
 
 # Commande pour démarrer le serveur
+
 CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
