@@ -25,7 +25,7 @@ Route::get('/login',[EntrepriseController::class, 'login'])->name('login');
 Route::post('/login',[EntrepriseController::class, 'postLogin'])->name('postLogin');
 Route::get('/register',[EntrepriseController::class, 'register'])->name('register');
 Route::post('/register',[EntrepriseController::class, 'postRegister'])->name('postRegister');
-Route::get('/logout',[EntrepriseController::class, 'logout'])->name('logout');
+Route::get('/logout',[EntrepriseController::class, 'logout'])->name('logout'); 
 
 Route::get('/entreprise/dashboard',[EntrepriseController::class, 'dashboard_entreprise'])->name('dashboard_entreprise')->middleware('entreprise');
 Route::get('/entreprise/liste/employe', [EntrepriseController::class, 'liste_employe'])->name('liste_employe')->middleware('entreprise');
