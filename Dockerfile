@@ -51,6 +51,12 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copier le reste du code
 COPY . .
 
+# Forcer la variable d'environnement pour PostgreSQL
+ENV DB_CONNECTION=pgsql
+
+# Nettoyer les caches
+RUN php artisan config:clear && php artisan cache:clear
+
 # Permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 storage bootstrap/cache
@@ -61,5 +67,5 @@ RUN npm install && npm run build
 # Exposer le port
 EXPOSE 8000
 
-# Commande de démarrage
-CMD ["sh", "-c", "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+# Commande de démarrage sans migrations automatiques
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
