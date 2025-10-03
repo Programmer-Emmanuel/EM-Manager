@@ -16,7 +16,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 
 RUN docker-php-ext-install \
     pdo \
-    pdo_mysql \
     pdo_pgsql \
     pgsql \
     mbstring \
@@ -61,5 +60,5 @@ RUN npm install && npm run build
 # Exposer le port
 EXPOSE 8000
 
-# Commande pour démarrer le serveur (avec --force pour les migrations)
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+# Commande pour démarrer le serveur (SANS migrations automatiques)
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
