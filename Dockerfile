@@ -38,26 +38,26 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Installer Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
+# Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers
+# Copier les fichiers de configuration pour mieux utiliser le cache Docker
+COPY composer.json composer.lock ./
+
+# Installer les dépendances PHP
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Copier le reste des fichiers
 COPY . .
 
-# Installer les dépendances PHP et générer la clé
-RUN composer install --no-dev --optimize-autoloader --no-scripts \
-    && php artisan key:generate --force
+# Définir les permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 storage bootstrap/cache
 
 # Installer et builder les assets Node.js
 RUN npm install && npm run build
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 storage bootstrap/cache
-
-# Optimiser l'application
-RUN php artisan config:cache \
-    && php artisan route:cache
-
+# Exposer le port
 EXPOSE 8000
 
 # Commande de démarrage simple
