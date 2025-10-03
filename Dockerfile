@@ -1,63 +1,46 @@
-FROM php:8.2-cli
+# Image PHP avec extensions nécessaires
+FROM php:8.3-cli
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# Arguments Composer
+ARG COMPOSER_ALLOW_SUPERUSER=1
+ARG COMPOSER_HOME=/composer
 
-# Mettre à jour la liste des paquets et installer les dépendances système
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-    git curl unzip sqlite3 \
-    libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev \
-    libicu-dev zlib1g-dev libssl-dev libzip-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Configurer et installer les extensions PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-configure intl
-
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    exif \
-    bcmath \
+    git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
     zip \
-    opcache \
-    pcntl \
-    gd \
-    intl
-
-# Installer Redis via PECL
-RUN pecl install redis && docker-php-ext-enable redis
-
-# Installer Node.js LTS 20.x via NodeSource
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get update && apt-get install -y nodejs \
+    curl \
+    vim \
+    libonig-dev \
+    npm \
+    nodejs \
+    && docker-php-ext-install pdo_pgsql mbstring zip bcmath pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Installer Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers de configuration pour mieux utiliser le cache Docker
-COPY composer.json composer.lock ./
-
-# Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Copier le reste des fichiers
+# Copier tout le projet AVANT d’installer les dépendances
 COPY . .
 
-# Définir les permissions
+# Installer les dépendances PHP
+RUN composer install --no-dev --optimize-autoloader
+
+# Donner les droits à www-data
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 storage bootstrap/cache
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Installer et builder les assets Node.js
-RUN npm install && npm run build
-
-# Exposer le port
+# Exposer le port PHP intégré
 EXPOSE 8000
 
-# Commande pour démarrer le serveur
-
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+# Commande par défaut : lancer migrate:fresh --seed puis le serveur PHP
+CMD ["sh", "-c", "php artisan migrate && php artisan serve --host=0.0.0.0 --port=8000"]

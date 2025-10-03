@@ -1,14 +1,36 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  laravel:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: em-manager-app
-    volumes:
-      - .:/var/www
-      - ./database:/var/www/database
+    container_name: em-manager
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_URL: ${DB_URL}
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      MAIL_MAILER: smtp
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
