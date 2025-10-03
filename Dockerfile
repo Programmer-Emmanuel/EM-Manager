@@ -1,8 +1,9 @@
+# Utiliser l'image officielle PHP 8.2
 FROM php:8.2-cli
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Mettre à jour la liste des paquets et installer les dépendances système
+# Installer dépendances système
 RUN apt-get update && apt-get install -y \
     git curl unzip \
     libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev \
@@ -30,7 +31,7 @@ RUN docker-php-ext-install \
 # Installer Redis via PECL
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Installer Node.js LTS 20.x via NodeSource
+# Installer Node.js LTS 20.x
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get update && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -41,16 +42,16 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers de configuration pour mieux utiliser le cache Docker
+# Copier les fichiers composer
 COPY composer.json composer.lock ./
 
 # Installer les dépendances PHP
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copier le reste des fichiers
+# Copier le reste du code
 COPY . .
 
-# Définir les permissions
+# Permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 storage bootstrap/cache
 
@@ -60,5 +61,5 @@ RUN npm install && npm run build
 # Exposer le port
 EXPOSE 8000
 
-# Commande de démarrage simple
-CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
+# Commande de démarrage
+CMD ["sh", "-c", "php artisan config:clear && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"]
