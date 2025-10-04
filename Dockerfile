@@ -11,61 +11,46 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configurer et installer les extensions PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-configure intl
-
-RUN docker-php-ext-install \
-    pdo \
-    pdo_pgsql \
-    pgsql \
-    mbstring \
-    exif \
-    bcmath \
-    zip \
-    opcache \
-    pcntl \
-    gd \
-    intl
-
-# Installer Redis via PECL
+# Installer extensions PHP
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif bcmath zip opcache pcntl gd intl
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Installer Node.js LTS 20.x
+# Installer Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get update && apt-get install -y nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y nodejs \
+    && apt-get clean
 
 # Installer Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier les fichiers composer
-COPY composer.json composer.lock ./
-
-# Installer les dépendances PHP
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Copier le reste du code
+# Copier tout d'un coup
 COPY . .
 
-# Forcer la variable d'environnement pour PostgreSQL
+# FORCER l'environnement PostgreSQL
 ENV DB_CONNECTION=pgsql
+ENV DB_HOST=dpg-d3g104u3jp1c73fj5ja0-a.oregon-postgres.render.com
+ENV DB_PORT=5432
+ENV DB_DATABASE=em_manager
+ENV DB_USERNAME=em_manager_user
+ENV DB_PASSWORD=ReDTdSna6mJVBi90I1GMiD0uLfsymTkN
+ENV APP_ENV=production
+ENV APP_DEBUG=false
 
-# Nettoyer les caches
-RUN php artisan config:clear && php artisan cache:clear
-
-# Permissions pour Laravel
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 storage bootstrap/cache
-
-# Installer et builder les assets Node.js
+# Installer les dépendances
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 RUN npm install && npm run build
 
-# Exposer le port
+# Configurer l'application
+RUN php artisan key:generate --force
+RUN php artisan config:clear
+
+# Permissions
+RUN chmod -R 755 storage bootstrap/cache
+
 EXPOSE 8000
 
-# Commande de démarrage sans migrations automatiques
+# Démarrer simplement
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
