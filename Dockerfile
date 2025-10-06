@@ -1,56 +1,33 @@
-# Utiliser l'image officielle PHP 8.2
-FROM php:8.2-cli
-
-ENV COMPOSER_ALLOW_SUPERUSER=1
+# PHP CLI avec extensions nécessaires
+FROM php:8.3-cli
 
 # Installer dépendances système
 RUN apt-get update && apt-get install -y \
-    git curl unzip \
-    libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev \
-    libicu-dev zlib1g-dev libssl-dev libzip-dev \
-    libpq-dev \
+    git unzip libpq-dev libzip-dev zip curl vim libonig-dev npm nodejs \
+    && docker-php-ext-install pdo_pgsql mbstring zip bcmath pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Installer extensions PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif bcmath zip opcache pcntl gd intl
-RUN pecl install redis && docker-php-ext-enable redis
+# Installer Composer (version stable) directement
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Installer Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean
-
-# Installer Composer
-COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
-
+# Définir répertoire de travail
 WORKDIR /var/www/html
 
-# Copier tout d'un coup
-COPY . .
+# Copier le projet
+COPY . /var/www/html
 
-# FORCER l'environnement PostgreSQL
-ENV DB_CONNECTION=pgsql
-ENV DB_HOST=dpg-d3g104u3jp1c73fj5ja0-a.oregon-postgres.render.com
-ENV DB_PORT=5432
-ENV DB_DATABASE=em_manager
-ENV DB_USERNAME=em_manager_user
-ENV DB_PASSWORD=ReDTdSna6mJVBi90I1GMiD0uLfsymTkN
-ENV APP_ENV=production
-ENV APP_DEBUG=false
-
-# Installer les dépendances
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-RUN npm install && npm run build
-
-# Configurer l'application
-RUN php artisan key:generate --force
-RUN php artisan config:clear
+# Installer dépendances PHP
+RUN composer install --no-dev --optimize-autoloader
 
 # Permissions
-RUN chmod -R 755 storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
 
+# Exposer le port
 EXPOSE 8000
 
-# Démarrer simplement
+# Lancer serveur PHP
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
