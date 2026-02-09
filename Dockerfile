@@ -19,7 +19,8 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 COPY . .
 
-RUN chown -R www-data:www-data /var/www/html \
+RUN mkdir -p storage bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 storage bootstrap/cache
 
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}
