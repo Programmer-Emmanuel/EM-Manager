@@ -34,7 +34,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Poste</th>
                             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Département</th>
                             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Contact</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Salaire</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Salaire</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Début</th>
                             <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -62,14 +63,17 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
                                 {{ number_format($employe->salaire, 0, ',', ' ') }} F
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {{ $employe->date_embauche }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-3">
-                                    <a href="{{ route('edit_employe', Crypt::encrypt($employe->id)) }}" 
+                                    <a href="{{ route('edit_employe', $employe->id) }}" 
                                        class="text-blue-400 hover:text-blue-300 transition-colors"
                                        title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('destroy_employe', Crypt::encryptString($employe->id)) }}" 
+                                    <form action="{{ route('destroy_employe', $employe->id) }}" 
                                           method="POST" 
                                           onsubmit="return confirmDelete()"
                                           class="inline">

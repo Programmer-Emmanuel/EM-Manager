@@ -6,7 +6,7 @@
     <title>Contact | Développeur EM-Manager</title>
     <link rel="shortcut icon" href="images/management.png" type="image/x-icon">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
     @include('aos')
     
     <style>

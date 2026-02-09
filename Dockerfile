@@ -1,23 +1,25 @@
-# Utiliser PHP avec Apache pour la prod + extensions nécessaires
-FROM php:8.3-apache
-WORKDIR /var/www/html
-COPY . .
+FROM php:8.3-fpm
+
 RUN apt-get update && apt-get install -y \
-    unzip \
-    libzip-dev \
-    && docker-php-ext-install zip \
-    && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-    && php -r "unlink('composer-setup.php');" \
-    && composer install --no-scripts --no-autoloader --prefer-dist
+    git unzip libpq-dev libzip-dev zip curl vim \
+    nodejs npm libonig-dev \
+    libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo_pgsql mbstring zip bcmath pcntl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod rewrite
-COPY ./docker/apache/000-default.conf /etc/apache2/sites-available/
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN php artisan key:generate
-RUN composer dump-autoload \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-EXPOSE 80
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+COPY . .
+
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 storage bootstrap/cache
+
+CMD php artisan serve --host=0.0.0.0 --port=${PORT}

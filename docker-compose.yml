@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: em-manager
+    container_name: laravel_app
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -21,13 +21,13 @@ services:
       CACHE_STORE: database
       QUEUE_CONNECTION: database
       MAIL_MAILER: smtp
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION}
-      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: marcbamidele@gmail.com
+      MAIL_PASSWORD: zfeepoiwmsvpqpys
+      MAIL_ENCRYPTION: tls
+      MAIL_FROM_ADDRESS: marcbamidele@gmail.com
+      MAIL_FROM_NAME: EBAMAGE
     networks:
       - laravel
 

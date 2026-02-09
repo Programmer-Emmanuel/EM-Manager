@@ -6,6 +6,7 @@ use App\Models\Comptes;
 use App\Models\Conge;
 use App\Models\Employe;
 use App\Models\Entreprise;
+use App\Models\Produit;
 use App\Models\Transactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -268,11 +269,8 @@ class EntrepriseController extends Controller{
         return redirect()->route('liste_employe');
     }
 
-    public function edit_employe($encryptedId){
+    public function edit_employe($id){
     try {
-        // Décrypter l'ID
-        $id = Crypt::decrypt($encryptedId);
-
         // Récupérer l'entreprise connectée
         $entreprise = Auth::user();
         $entrepriseDetails = Entreprise::find($entreprise->id);
@@ -288,10 +286,8 @@ class EntrepriseController extends Controller{
     }
 }
 
-public function update_employe(Request $request, $encryptedId){
-    try {
-        Log::info('ID crypté reçu : ' . $encryptedId);
-        $id = Crypt::decrypt($encryptedId);
+public function update_employe(Request $request, $id){
+
 
         // Validation et mise à jour
         $validatedData = $request->validate([
@@ -309,17 +305,12 @@ public function update_employe(Request $request, $encryptedId){
         $employe->update($validatedData);
 
         return redirect()->route('liste_employe')->with('success', 'Employé modifié avec succès');
-    } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-        Log::error('Erreur de déchiffrement pour : ' . $encryptedId);
-        abort(404, 'ID invalide ou employé introuvable');
-    }
+
 }
 
 
-public function destroy_employe($hashedId){
+public function destroy_employe($id){
     try {
-        // Décoder l'ID hashé
-        $id = Crypt::decryptString($hashedId);
 
         // Récupérer l'employé à supprimer
         $employe = Employe::findOrFail($id);
@@ -480,70 +471,586 @@ public function approuver($id)
 
     public function afficherConseils()
 {
-    // Récupérer l'entreprise connectée
     $entreprise = Auth::user();
-
-    // Récupérer les détails de l'entreprise
     $entrepriseDetails = Entreprise::find($entreprise->id);
 
-    // Récupération des transactions
+    // Transactions récentes
     $transactions = Transactions::orderByDesc('created_at')->take(10)->get();
 
     // Construction du prompt
     $prompt = "Voici l’historique des transactions d’une entreprise (type: Entrée ou Sortie, montant, date):\n";
-
     foreach ($transactions as $t) {
         $prompt .= "- {$t->type} de " . number_format($t->montant, 0, ',', ' ') . " FCFA le " . $t->created_at->format('d/m/Y') . "\n";
     }
+    $prompt .= "\nDonne 10 conseils financiers simples en français uniquement. 
+    Réponds directement avec les conseils uniquement, sans introduction ni explication, sous forme de liste numérotée.";
 
-    $prompt .= "\nDonne 10 conseils financiers simples en français uniquement à cette entreprise. Réponds directement avec les conseils uniquement, sans introduction ni explication.";
 
-    // Appel de l'API OpenRouter
-    $response = Http::withHeaders([
-        'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
-        'Content-Type' => 'application/json',
-    ])->post('https://openrouter.ai/api/v1/chat/completions', [
-        'model' => 'deepseek/deepseek-chat-v3.1:free',
-        'messages' => [
-            ['role' => 'user', 'content' => $prompt]
-        ],
-        'temperature' => 0.7
-    ]);
+    // Liste de modèles gratuits stables
+    $models = [
+        "deepseek/deepseek-chat",           // Très stable
+        "google/gemma-2-2b-it",            // Léger et rapide
+        "qwen/qwen2.5-3b-instruct",        // Version plus petite
+        "microsoft/phi-3.5-mini-instruct", // Excellent pour les conseils
+    ];
 
-    if ($response->successful()) {
-        $contenu = $response->json('choices.0.message.content');
+    $contenu = null;
 
-        // Extraire toutes les lignes commençant par un nombre suivi d'un point (ex: 1. xxx)
+    foreach ($models as $model) {
+
+        try {
+            $response = Http::timeout(45)
+                ->withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                    'Content-Type' => 'application/json',
+                ])
+                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                    'model'    => $model,
+                    'messages' => [
+                        ['role' => 'user', 'content' => $prompt]
+                    ],
+                    'temperature' => 0.7,
+                ]);
+
+            if ($response->successful()) {
+
+                $contenu = $response->json('choices.0.message.content');
+                break; // on quitte la boucle → on garde ce modèle
+            }
+
+            // Log en cas d'échec pour ce modèle
+            Log::warning("Model failed: $model → " . $response->body());
+
+        } catch (\Throwable $e) {
+            Log::error("Erreur modèle $model : " . $e->getMessage());
+        }
+    }
+
+
+    // Si aucun modèle n’a répondu
+    if (!$contenu) {
+        $conseils = "Aucun conseil généré. OpenRouter est temporairement indisponible.";
+    } else {
+
+        // Extraction des lignes numérotées
         preg_match_all('/^\d+\.\s*(.+)$/m', $contenu, $matches);
 
         if (!empty($matches[1])) {
-            // Renumérotation des conseils avec saut de ligne entre chaque
+
+            // Renumérotation propre
             $conseilsRenumerotes = [];
-            foreach ($matches[1] as $index => $texte) {
-                $numero = $index + 1;
-                $conseilsRenumerotes[] = $numero . '. ' . trim($texte);
+            foreach ($matches[1] as $i => $texte) {
+                $conseilsRenumerotes[] = ($i + 1) . ". " . trim($texte);
             }
-            // On ajoute un saut de ligne entre chaque conseil
+
+            // Formatage final
             $conseils = implode("\n\n", $conseilsRenumerotes);
+
         } else {
-            $conseils = 'Aucun conseil exploitable n’a été trouvé.';
+            $conseils = "Contenu reçu mais non exploitable.";
         }
-    } else {
-        $conseils = 'Aucun conseil généré. Veuillez vérifier votre connexion ou votre clé API.';
-        echo("<script>console.log($response)</script>");
     }
 
-    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+    $count_conge = Conge::where('id_entreprise', $entreprise->id)
+        ->where('statut', 'En attente...')
+        ->count();
 
     return view('conseils', [
         'conseils' => $conseils,
         'entrepriseDetails' => $entrepriseDetails,
-        'count_conge' => $count_conge
+        'count_conge' => $count_conge,
     ]);
 }
 
 
 
 
+public function chat(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $entreprise = Entreprise::find($user->id);
+            
+            // Récupérer les données contextuelles de l'entreprise
+            $contextData = $this->getContextData($entreprise->id);
+            
+            // Construire le prompt avec le contexte
+            $prompt = $this->buildPrompt($request->message, $contextData);
+            
+            // Liste de modèles gratuits
+            $models = [
+                "deepseek/deepseek-chat",           // Très stable
+                "google/gemma-2-2b-it",            // Léger et rapide
+                "qwen/qwen2.5-3b-instruct",        // Version plus petite
+                "microsoft/phi-3.5-mini-instruct", // Excellent pour les conseils
+            ];
+            
+            $responseContent = null;
+            
+            foreach ($models as $model) {
+                try {
+                    $response = Http::timeout(60)
+                        ->withOptions(['verify' => false])
+                        ->withHeaders([
+                            'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
+                            'Content-Type' => 'application/json',
+                        ])
+                        ->post('https://openrouter.ai/api/v1/chat/completions', [
+                            'model' => $model,
+                            'messages' => [
+                                [
+                                    'role' => 'system',
+                                    'content' => "Tu es ManagerAI, un assistant expert en gestion d'entreprise. Tu as accès aux données de l'entreprise et tu réponds en français de manière professionnelle et concise."
+                                ],
+                                ['role' => 'user', 'content' => $prompt]
+                            ],
+                            'temperature' => 0.7,
+                            'max_tokens' => 1000,
+                        ]);
+                    
+                    if ($response->successful()) {
+                        $responseContent = $response->json('choices.0.message.content');
+                        break;
+                    }
+                    
+                    Log::warning("Modèle échoué: $model → " . $response->body());
+                    
+                } catch (\Throwable $e) {
+                    Log::error("Erreur modèle $model : " . $e->getMessage());
+                }
+            }
+            
+            if (!$responseContent) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Impossible de contacter le service IA. Veuillez réessayer.'
+                ]);
+            }
+            
+            return response()->json([
+                'status' => 'success',
+                'response' => $responseContent
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Erreur Chat AI: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Une erreur est survenue. Veuillez réessayer.'
+            ]);
+        }
+    }
+    
+    private function getContextData($entrepriseId)
+    {
+        // Transactions récentes
+        $transactions = Transactions::where('entreprise_id', $entrepriseId)
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get();
+        
+        // Détails de l'entreprise
+        $entreprise = Entreprise::find($entrepriseId);
+        
+        // Employés
+        $employes = Employe::where('id_entreprise', $entrepriseId)
+            ->count();
+        
+        // Congés en attente
+        $congesEnAttente = Conge::where('id_entreprise', $entrepriseId)
+            ->where('statut', 'En attente...')
+            ->count();
+        
+        // Compte (si disponible)
+        $compte = Comptes::where('entreprise_id', $entrepriseId)->first();
+        $solde = $compte ? $compte->montant : 0;
+        
+        return [
+            'transactions' => $transactions,
+            'entreprise' => $entreprise,
+            'nombre_employes' => $employes,
+            'conges_en_attente' => $congesEnAttente,
+            'solde' => $solde
+        ];
+    }
+    
+    private function buildPrompt($question, $contextData)
+    {
+        $prompt = "Contexte de l'entreprise:\n\n";
+        
+        // Informations de l'entreprise
+        $prompt .= "Nom de l'entreprise: " . $contextData['entreprise']->nom_entreprise . "\n";
+        $prompt .= "Dirigeant: " . $contextData['entreprise']->prenom_directeur . " " . $contextData['entreprise']->nom_directeur . "\n";
+        $prompt .= "Nombre d'employés: " . $contextData['nombre_employes'] . "\n";
+        $prompt .= "Congés en attente: " . $contextData['conges_en_attente'] . "\n";
+        $prompt .= "Solde disponible: " . number_format($contextData['solde'], 0, ',', ' ') . " FCFA\n\n";
+        
+        // Transactions récentes
+        $prompt .= "Transactions récentes (10 dernières):\n";
+        foreach ($contextData['transactions'] as $t) {
+            $prompt .= "- " . $t->type . " de " . number_format($t->montant, 0, ',', ' ') . 
+                      " FCFA pour '" . $t->motif . "' le " . $t->created_at->format('d/m/Y') . "\n";
+        }
+        
+        // Question de l'utilisateur
+        $prompt .= "\n\nQuestion de l'utilisateur: " . $question . "\n\n";
+        
+        $prompt .= "Instructions importantes:
+        1. Réponds uniquement en français
+        2. Sois professionnel et concis
+        3. Utilise les données contextuelles pour personnaliser ta réponse
+        4. Fais des recommandations pratiques et actionnables
+        5. Si la question nécessite des données que tu n'as pas, le préciser
+        6. Formatte ta réponse avec des paragraphes clairs";
+        
+        return $prompt;
+    }
+
+
+
+    // Ajoutez ces méthodes à la fin de votre EntrepriseController
+
+public function paiement_employe()
+{
+    $entreprise = Auth::user();
+    $entrepriseDetails = Entreprise::find($entreprise->id);
+
+    $employes = Employe::where('id_entreprise', '=', $entreprise->id)->get();
+
+    foreach ($employes as $employe) {
+        // 🔥 CORRECTION : Chercher dans l'ordre "Prénom Nom" comme dans callback
+        $employe->deja_paye_ce_mois = Transactions::where('entreprise_id', $entreprise->id)
+            ->where('motif', 'like', '%Paiement salaire - ' . $employe->prenom_employe . ' ' . $employe->nom_employe . '%')  // ⬅️ Changé ici
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->exists();
+        
+        $dernierPaiement = Transactions::where('entreprise_id', $entreprise->id)
+            ->where('motif', 'like', '%Paiement salaire - ' . $employe->prenom_employe . ' ' . $employe->nom_employe . '%')  // ⬅️ Changé ici
+            ->latest()
+            ->first();
+        
+        $employe->date_dernier_paiement = $dernierPaiement ? $dernierPaiement->created_at : null;
+    }
+
+    $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+        ->where('statut', '=', 'En attente...')
+        ->count();
+
+    return view('paiement_employe', compact('entrepriseDetails', 'employes', 'compte', 'count_conge'));
+}
+
+public function process_paiement(Request $request)
+{
+    $request->validate([
+        'employe_id' => 'required|exists:employes,id',
+        'montant' => 'required|numeric|min:1',
+    ]);
+
+    try {
+        $entreprise = Auth::user();
+        $employe = Employe::findOrFail($request->employe_id);
+        
+        // Vérifier que l'employé appartient à l'entreprise
+        if ($employe->id_entreprise != $entreprise->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Employé non autorisé'
+            ], 403);
+        }
+
+        // Vérifier le solde
+        $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
+        if (!$compte || $compte->montant < $request->montant) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Solde insuffisant'
+            ]);
+        }
+
+        // Générer une référence unique pour le paiement
+        $reference = 'PAY_' . time() . '_' . strtoupper(uniqid());
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'employe' => [
+                    'id' => $employe->id,
+                    'nom' => $employe->nom_employe,
+                    'prenom' => $employe->prenom_employe,
+                ],
+                'montant' => $request->montant,
+                'reference' => $reference,
+                'public_key' => '42158a40c9ef11f0b284d131c761bd2b',  // <-- ICI AUSSI
+                'callback' => route('paiement.callback'),  // <-- IMPORTANT
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur process_paiement: ' . $e->getMessage());
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Une erreur est survenue'
+        ], 500);
+    }
+}
+
+public function paiement_callback(Request $request)
+{
+    try {
+        $data = $request->all();
+        Log::info('Callback KkiaPay reçu: ', $data);
+
+        if ($data['status'] == 'SUCCESS') {
+            $reference = $data['transaction_id'];
+            $employeId = $data['metadata']['employe_id'];
+            $montant = $data['amount'];
+            
+            $employe = Employe::find($employeId);
+            $entreprise = Entreprise::find($employe->id_entreprise);
+            
+            // Créer la transaction (cela sert d'historique)
+            $transaction = new Transactions();
+            $transaction->motif = 'Paiement salaire - ' . $employe->nom_employe . ' ' . $employe->prenom_employe;
+            $transaction->type = 'Sortie';
+            $transaction->montant = $montant;
+            $transaction->entreprise_id = $entreprise->id;
+            $transaction->reference = $reference;
+            $transaction->save();
+
+            // Mettre à jour le compte
+            $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
+            if ($compte) {
+                $compte->montant -= $montant;
+                $compte->save();
+            }
+
+            return response()->json(['status' => 'success']);
+        }
+
+    } catch (\Exception $e) {
+        Log::error('Erreur callback paiement: ' . $e->getMessage());
+        return response()->json(['status' => 'error'], 500);
+    }
+}
+
+public function historique_paiements()
+{
+    $entreprise = Auth::user();
+    $entrepriseDetails = Entreprise::find($entreprise->id);
+
+    // Utilisez paginate() au lieu de get()
+    $paiements = Transactions::where('entreprise_id', $entreprise->id)
+        ->where('motif', 'like', 'Paiement salaire%')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10); // 10 éléments par page
+
+    $paiements->getCollection()->transform(function ($paiement) {
+        // Extraire le nom de l'employé du motif
+        preg_match('/Paiement salaire - (.*)/', $paiement->motif, $matches);
+        $paiement->employe_nom = $matches[1] ?? 'N/A';
+        return $paiement;
+    });
+
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+        ->where('statut', '=', 'En attente...')
+        ->count();
+
+    return view('historique_paiements', compact('entrepriseDetails', 'paiements', 'count_conge'));
+}
+
+
+public function liste_produits()
+{
+    $entreprise = Auth::user();
+    $entrepriseDetails = Entreprise::find($entreprise->id);
+
+    $produits = Produit::where('id_entreprise', $entreprise->id)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+        ->where('statut', '=', 'En attente...')
+        ->count();
+
+    return view('liste_produit', compact('entrepriseDetails', 'produits', 'count_conge'));
+}
+
+public function ajout_produit()
+{
+    $entreprise = Auth::user();
+    $entrepriseDetails = Entreprise::find($entreprise->id);
+
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+        ->where('statut', '=', 'En attente...')
+        ->count();
+
+    return view('ajout_produit', compact('entrepriseDetails', 'count_conge'));
+}
+
+public function store_produit(Request $request)
+{
+    $request->validate([
+        'nom' => 'required|string|max:255',
+        'description' => 'required|string',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ], [
+        'nom.required' => 'Le nom du produit est obligatoire',
+        'nom.max' => 'Le nom ne doit pas dépasser 255 caractères',
+        'description.required' => 'La description est obligatoire',
+        'image.image' => 'Le fichier doit être une image',
+        'image.mimes' => 'L\'image doit être au format: jpeg, png, jpg, gif',
+        'image.max' => 'L\'image ne doit pas dépasser 2Mo',
+    ]);
+
+    try {
+        $entreprise = Auth::user();
+
+        $produit = new Produit();
+        $produit->nom = $request->nom;
+        $produit->description = $request->description;
+        $produit->id_entreprise = $entreprise->id;
+
+        // Upload de l'image si elle existe
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $produit->image = $this->uploadImageToHosting($request->file('image'));
+        }
+
+        $produit->save();
+
+        return redirect()->route('liste_produits')
+            ->with('success', 'Produit créé avec succès!');
+
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la création: ' . $e->getMessage())
+            ->withInput();
+    }
+}
+
+public function edit_produit($id)
+{
+    try {
+        $entreprise = Auth::user();
+        $entrepriseDetails = Entreprise::find($entreprise->id);
+
+        $produit = Produit::where('id', $id)
+            ->where('id_entreprise', $entreprise->id)
+            ->firstOrFail();
+
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+            ->where('statut', '=', 'En attente...')
+            ->count();
+
+        return view('edit_produit', compact('entrepriseDetails', 'produit', 'count_conge'));
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        abort(404, 'Produit non trouvé');
+    }
+}
+
+public function update_produit(Request $request, $id)
+{
+    $request->validate([
+        'nom' => 'required|string|max:255',
+        'description' => 'required|string',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ], [
+        'nom.required' => 'Le nom du produit est obligatoire',
+        'nom.max' => 'Le nom ne doit pas dépasser 255 caractères',
+        'description.required' => 'La description est obligatoire',
+        'image.image' => 'Le fichier doit être une image',
+        'image.mimes' => 'L\'image doit être au format: jpeg, png, jpg, gif',
+        'image.max' => 'L\'image ne doit pas dépasser 2Mo',
+    ]);
+
+    try {
+        $entreprise = Auth::user();
+
+        $produit = Produit::where('id', $id)
+            ->where('id_entreprise', $entreprise->id)
+            ->firstOrFail();
+
+        $produit->nom = $request->nom;
+        $produit->description = $request->description;
+
+        // Upload de la nouvelle image si elle existe
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            $produit->image = $this->uploadImageToHosting($request->file('image'));
+        }
+
+        $produit->save();
+
+        return redirect()->route('liste_produits')
+            ->with('success', 'Produit mis à jour avec succès!');
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        abort(404, 'Produit non trouvé');
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la mise à jour: ' . $e->getMessage())
+            ->withInput();
+    }
+}
+
+public function destroy_produit($id)
+{
+    try {
+        $entreprise = Auth::user();
+
+        $produit = Produit::where('id', $id)
+            ->where('id_entreprise', $entreprise->id)
+            ->firstOrFail();
+
+        $produit->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Produit supprimé avec succès'
+        ]);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Produit non trouvé'
+        ], 404);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur lors de la suppression'
+        ], 500);
+    }
+}
+
+private function uploadImageToHosting($image)
+{
+    $apiKey = 'e983b56d6b5aa7ac66a62db04de45396'; // ⚠️ Mets ta vraie clé ici
+
+    // Vérifier que le fichier est valide
+    if (!$image || !$image->isValid()) {
+        throw new \Exception("Fichier image non valide.");
+    }
+
+    // Encoder l'image en base64
+    $imageContent = base64_encode(file_get_contents($image->getRealPath()));
+
+    // Envoi vers ImgBB
+    $response = Http::asForm()->post('https://api.imgbb.com/1/upload', [
+        'key'   => $apiKey,
+        'image' => $imageContent,
+    ]);
+
+    // Debug si erreur
+    if (!$response->successful()) {
+        throw new \Exception(
+            "Erreur ImgBB : " . $response->status() . " - " . $response->body()
+        );
+    }
+
+    // Retourner l'URL de l'image hébergée
+    return $response->json()['data']['url'];
+}
 
 }

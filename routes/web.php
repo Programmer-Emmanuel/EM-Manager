@@ -32,9 +32,9 @@ Route::get('/entreprise/liste/employe', [EntrepriseController::class, 'liste_emp
 Route::get('/employe/export', [EntrepriseController::class, 'export_employe'])->name('export_employe')->middleware('entreprise');
 Route::get('/entreprise/ajout/employe', [EntrepriseController::class, 'ajout_employe'])->name('ajout_employe')->middleware('entreprise');
 Route::post('/entreprise/store/employe', [EntrepriseController::class,'store_employe'])->name('store_employe')->middleware('entreprise');
-Route::get('/entreprise/employe/{encryptedId}/edit', [EntrepriseController::class, 'edit_employe'])->name('edit_employe')->middleware('entreprise');
-Route::put('/entreprise/employe/{encryptedId}', [EntrepriseController::class, 'update_employe'])->name('update_employe')->middleware('entreprise');
-Route::delete('/entreprise/employe/{hashedId}', [EntrepriseController::class, 'destroy_employe'])->name('destroy_employe')->middleware('entreprise');
+Route::get('/entreprise/employe/{id}/edit', [EntrepriseController::class, 'edit_employe'])->name('edit_employe')->middleware('entreprise');
+Route::put('/entreprise/employe/{id}', [EntrepriseController::class, 'update_employe'])->name('update_employe')->middleware('entreprise');
+Route::delete('/entreprise/employe/{id}', [EntrepriseController::class, 'destroy_employe'])->name('destroy_employe')->middleware('entreprise');
 Route::get('/entreprise/gestion/conge', [EntrepriseController::class,'gestion_conge'])->name('gestion_conge')->middleware('entreprise');
 Route::patch('/conge/{id}/approuver', [EntrepriseController::class, 'approuver'])->name('conge_approuver')->middleware('entreprise');
 Route::patch('/conge/{id}/rejeter', [EntrepriseController::class, 'rejeter'])->name('conge_rejeter')->middleware('entreprise');
@@ -53,7 +53,22 @@ Route::get('/employe/conge', [EmployeController::class, 'employe_conge'])->name(
 Route::get('/employe/demande/conge', [EmployeController::class, 'demande_conge'])->name('demande_conge')->middleware('employe');
 Route::post('/employe/demande/conge', [EmployeController::class, 'demande_conge_post'])->name('demande_conge_post')->middleware('employe');
 Route::get('/employe/protected', [EmployeController::class, 'employe_protect'])->name('employe_protect');
+Route::post('/chat-ai', [EntrepriseController::class, 'chat'])->name('chat.ai');
 
+// Routes pour la gestion des produits
+Route::middleware('entreprise')->group(function () {
+    Route::get('/produits', [EntrepriseController::class, 'liste_produits'])->name('liste_produits');
+    Route::get('/produits/ajouter', [EntrepriseController::class, 'ajout_produit'])->name('ajout_produit');
+    Route::post('/produits/store', [EntrepriseController::class, 'store_produit'])->name('store_produit');
+    Route::get('/produits/edit/{id}', [EntrepriseController::class, 'edit_produit'])->name('edit_produit');
+    Route::post('/produits/update/{id}', [EntrepriseController::class, 'update_produit'])->name('update_produit');
+    Route::delete('/produits/destroy/{id}', [EntrepriseController::class, 'destroy_produit'])->name('destroy_produit');
+});
 
-
-
+// Paiement des employés
+Route::middleware('entreprise')->group(function () {
+    Route::get('/paiement/employe', [EntrepriseController::class, 'paiement_employe'])->name('paiement.employe');
+    Route::post('/process-paiement', [EntrepriseController::class, 'process_paiement'])->name('paiement.process');
+    Route::get('/historique/paiements', [EntrepriseController::class, 'historique_paiements'])->name('paiement.historique');
+});
+Route::post('/paiement-callback', [EntrepriseController::class, 'paiement_callback'])->name('paiement.callback');
