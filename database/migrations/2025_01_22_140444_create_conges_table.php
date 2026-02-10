@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('conges', function (Blueprint $table) {
-            $table->id();
-            $table->string('id_employe');
-            $table->string('id_entreprise');
+            $table->uuid('id')->primary();
+            $table->uuid('id_employe');
+            $table->uuid('id_entreprise');
             $table->string('type_conge');
             $table->date('date_debut');
             $table->date('date_fin');

@@ -38,7 +38,7 @@
 
         <!-- Formulaire -->
         <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl overflow-hidden">
-            <form action="{{ route('update_employe', Crypt::encrypt($employe->id)) }}" method="POST" class="p-6 space-y-6">
+            <form action="{{ route('update_employe', $employe->id) }}" method="POST" class="p-6 space-y-6">
                 @csrf
                 @method('PUT')
 

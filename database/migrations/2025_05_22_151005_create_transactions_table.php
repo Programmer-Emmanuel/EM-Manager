@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transactions', function (Blueprint $table) {
-            $table->id();
-            $table->integer('entreprise_id');
+            $table->uuid('id')->primary();
+            $table->uuid('entreprise_id');
             $table->string('motif');
             $table->string('type');
             $table->integer('montant');

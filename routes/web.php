@@ -68,7 +68,22 @@ Route::middleware('entreprise')->group(function () {
 // Paiement des employés
 Route::middleware('entreprise')->group(function () {
     Route::get('/paiement/employe', [EntrepriseController::class, 'paiement_employe'])->name('paiement.employe');
-    Route::post('/process-paiement', [EntrepriseController::class, 'process_paiement'])->name('paiement.process');
-    Route::get('/historique/paiements', [EntrepriseController::class, 'historique_paiements'])->name('paiement.historique');
+    Route::get('/paiement/historique', [EntrepriseController::class, 'historique_paiements'])->name('paiement.historique');
+    
+    Route::post('/process-paiement', [EntrepriseController::class, 'process_paiement'])->name('process.paiement');
+    Route::post('/verifier-transaction', [EntrepriseController::class, 'verifierTransaction'])->name('verifier.transaction');
+    
+
+
 });
-Route::post('/paiement-callback', [EntrepriseController::class, 'paiement_callback'])->name('paiement.callback');
+// Callback frontend
+Route::get('/paiement/callback', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Paiement simulé reçu'
+    ]);
+})->name('paiement.callback');
+
+    
+// Webhook KkiaPay (sans auth car appelé par KkiaPay)
+Route::post('/kkiapay/webhook', [EntrepriseController::class, 'webhookKkiaPay'])->name('kkiapay.webhook');
