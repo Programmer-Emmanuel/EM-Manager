@@ -742,60 +742,240 @@ public function paiement_employe()
     }
 
     public function process_paiement(Request $request)
-    {
-        $request->validate([
-            'employe_id' => 'required|exists:employes,id',
-            'montant' => 'required|numeric|min:100',
-        ]);
+{
+    $request->validate([
+        'employe_id' => 'required|exists:employes,id',
+        'montant' => 'required|numeric|min:100',
+    ]);
 
-        try {
-            $entreprise = Auth::user();
-            $employe = Employe::findOrFail($request->employe_id);
-            
-            // Vérifier que l'employé appartient à l'entreprise
-            if ($employe->id_entreprise != $entreprise->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Employé non autorisé'
-                ], 403);
-            }
-
-            // Vérifier le solde
-            $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
-            if (!$compte || $compte->montant < $request->montant) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Solde insuffisant'
-                ]);
-            }
-
-            // Générer une référence unique pour le paiement
-            $reference = 'PAY_' . time() . '_' . strtoupper(uniqid());
-
-            return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'employe' => [
-                        'id' => $employe->id,
-                        'nom' => $employe->nom_employe,
-                        'prenom' => $employe->prenom_employe,
-                    ],
-                    'montant' => $request->montant,
-                    'reference' => $reference,
-                    'public_key' => config('services.kkiapay.public_key'),
-                    'callback' => route('paiement.callback'),
-                    'webhook_url' => route('kkiapay.webhook'), // IMPORTANT: webhook pour vérification
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur process_paiement: ' . $e->getMessage());
+    try {
+        $entreprise = Auth::user();
+        $employe = Employe::findOrFail($request->employe_id);
+        
+        // Vérifier que l'employé appartient à l'entreprise
+        if ($employe->id_entreprise != $entreprise->id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Une erreur est survenue'
-            ], 500);
+                'message' => 'Employé non autorisé'
+            ], 403);
         }
+
+        // Utiliser directement le salaire de l'employé
+        $montantAPayer = $employe->salaire;
+        
+        // Vérifier que le montant envoyé correspond bien au salaire (sécurité)
+        if (abs($request->montant - $montantAPayer) > 0.01) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Le montant doit correspondre au salaire de l\'employé'
+            ]);
+        }
+
+        // Vérifier le solde
+        $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
+        if (!$compte || $compte->montant < $montantAPayer) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Solde insuffisant'
+            ]);
+        }
+
+        // Vérifier si déjà payé ce mois
+        $dejaPaye = Transactions::where('entreprise_id', $entreprise->id)
+            ->where('motif', 'like', '%Paiement salaire - ' . $employe->prenom_employe . ' ' . $employe->nom_employe . '%')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->exists();
+        
+        if ($dejaPaye) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cet employé a déjà été payé ce mois-ci'
+            ]);
+        }
+
+        // Générer une référence unique pour le paiement
+        $reference = 'PAY_' . time() . '_' . strtoupper(uniqid());
+
+        // S'assurer que la clé KkiaPay existe
+        $publicKey = config('services.kkiapay.public_key');
+        if (!$publicKey) {
+            Log::error('Clé publique KkiaPay non configurée');
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Configuration de paiement incomplète'
+            ]);
+        }
+
+        // URL de callback ABSOLUE (très important pour KkiaPay)
+        $callbackUrl = route('paiement.callback');
+        
+        // Vérifier que l'URL est bien formée
+        if (!filter_var($callbackUrl, FILTER_VALIDATE_URL)) {
+            Log::error('URL de callback invalide', ['url' => $callbackUrl]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Erreur de configuration du callback'
+            ]);
+        }
+
+        Log::info('Préparation paiement', [
+            'employe' => $employe->prenom_employe . ' ' . $employe->nom_employe,
+            'montant' => $montantAPayer,
+            'reference' => $reference,
+            'callback_url' => $callbackUrl
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'employe' => [
+                    'id' => $employe->id,
+                    'nom' => $employe->nom_employe,
+                    'prenom' => $employe->prenom_employe,
+                    'email' => $employe->email ?? '',
+                    'telephone' => $employe->telephone ?? ''
+                ],
+                'montant' => $montantAPayer,
+                'reference' => $reference,
+                'public_key' => $publicKey,
+                'callback' => $callbackUrl, // URL absolue pour KkiaPay
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur process_paiement: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all()
+        ]);
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Une erreur est survenue lors de la préparation du paiement'
+        ], 500);
     }
+}
+
+    public function callback(Request $request)
+{
+    try {
+        Log::info('Callback KkiaPay reçu', $request->all());
+
+        // Vérifier le statut du paiement
+        if ($request->input('status') !== 'SUCCESS') {
+            Log::info('Paiement non réussi', ['status' => $request->input('status')]);
+            return response()->json(['status' => 'ignored']);
+        }
+
+        // Décoder les données envoyées avec le paiement
+        $data = json_decode($request->input('data'), true);
+
+        if (!$data) {
+            Log::error('Data vide ou invalide dans callback');
+            return response()->json(['status' => 'error']);
+        }
+
+        $reference = $data['reference'] ?? null;
+        $employeId = $data['employe_id'] ?? null;
+        $type = $data['type'] ?? 'salaire';
+
+        if (!$reference || !$employeId) {
+            Log::error('Données manquantes dans callback', $data);
+            return response()->json(['status' => 'error']);
+        }
+
+        // 🔒 Vérifier l'anti-doublon
+        if (Transactions::where('reference', $reference)->exists()) {
+            Log::info('Transaction déjà enregistrée', ['reference' => $reference]);
+            return response()->json(['status' => 'already_saved']);
+        }
+
+        // Récupérer l'employé
+        $employe = Employe::find($employeId);
+        if (!$employe) {
+            Log::error('Employé non trouvé', ['employe_id' => $employeId]);
+            return response()->json(['status' => 'error']);
+        }
+
+        // Récupérer l'entreprise de l'employé
+        $entrepriseId = $employe->id_entreprise;
+
+        // ✅ Enregistrement de la transaction
+        $transaction = new Transactions();
+        $transaction->entreprise_id = $entrepriseId;
+        $transaction->type = 'Sortie';
+        $transaction->montant = $employe->salaire;
+        $transaction->motif = 'Paiement salaire - ' . $employe->prenom_employe . ' ' . $employe->nom_employe;
+        $transaction->reference = $reference;
+        $transaction->statut = 'success';
+        $transaction->save();
+
+        // ✅ Mise à jour du solde du compte
+        $compte = Comptes::where('entreprise_id', $entrepriseId)->first();
+        if ($compte) {
+            $compte->montant -= $employe->salaire;
+            $compte->save();
+            Log::info('Solde mis à jour', [
+                'entreprise_id' => $entrepriseId,
+                'nouveau_solde' => $compte->montant,
+                'montant_déduit' => $employe->salaire
+            ]);
+        }
+
+        Log::info('Transaction enregistrée avec succès', [
+            'reference' => $reference,
+            'employe' => $employe->prenom_employe . ' ' . $employe->nom_employe,
+            'montant' => $employe->salaire
+        ]);
+
+        return response()->json(['status' => 'success']);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur dans callback paiement : ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json(['status' => 'error'], 500);
+    }
+}
+
+
+    public function historique_paiements()
+    {
+        $entreprise = Auth::user();
+        $entrepriseDetails = Entreprise::find($entreprise->id);
+
+        $paiements = Transactions::where('entreprise_id', $entreprise->id)
+            ->where('motif', 'like', 'Paiement salaire%')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $paiements->transform(function ($paiement) {
+            preg_match('/Paiement salaire - (.*)/', $paiement->motif, $matches);
+            $paiement->employe_nom = $matches[1] ?? 'N/A';
+            return $paiement;
+        });
+
+        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+            ->where('statut', '=', 'En attente...')
+            ->count();
+
+        return view('historique_paiements', compact('entrepriseDetails', 'paiements', 'count_conge'));
+    }
+
+    // Route pour webhook KkiaPay (optionnel)
+    public function webhook(Request $request)
+    {
+        // Logique pour vérifier les paiements via webhook
+        $signature = $request->header('x-kkiapay-signature');
+        $payload = $request->getContent();
+        
+        // Vérifier la signature (à implémenter selon la doc KkiaPay)
+        
+        $data = $request->all();
+        Log::info('Webhook KkiaPay:', $data);
+        
+        return response()->json(['status' => 'received']);
+    }
+
 
     /**
      * Callback pour le frontend (appelé après paiement)
@@ -947,29 +1127,6 @@ public function paiement_employe()
             Log::error('Erreur vérification transaction: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Erreur serveur'], 500);
         }
-    }
-
-    public function historique_paiements()
-    {
-        $entreprise = Auth::user();
-        $entrepriseDetails = Entreprise::find($entreprise->id);
-
-        $paiements = Transactions::where('entreprise_id', $entreprise->id)
-            ->where('motif', 'like', 'Paiement salaire%')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        $paiements->getCollection()->transform(function ($paiement) {
-            preg_match('/Paiement salaire - (.*)/', $paiement->motif, $matches);
-            $paiement->employe_nom = $matches[1] ?? 'N/A';
-            return $paiement;
-        });
-
-        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
-            ->where('statut', '=', 'En attente...')
-            ->count();
-
-        return view('historique_paiements', compact('entrepriseDetails', 'paiements', 'count_conge'));
     }
 
 

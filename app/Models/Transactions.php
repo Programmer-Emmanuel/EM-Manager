@@ -23,4 +23,11 @@ class Transactions extends Model
             }
         });
     }
+
+    protected $fillable = [
+        'entreprise_id',
+        'motif',
+        'type',
+        'montant',
+    ];
 }

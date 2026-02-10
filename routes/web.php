@@ -77,12 +77,7 @@ Route::middleware('entreprise')->group(function () {
 
 });
 // Callback frontend
-Route::get('/paiement/callback', function () {
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Paiement simulé reçu'
-    ]);
-})->name('paiement.callback');
+Route::get('/paiement/callback', [EntrepriseController::class, 'callback'])->name('paiement.callback');
 
     
 // Webhook KkiaPay (sans auth car appelé par KkiaPay)
