@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - EM-Manager</title>
     <link rel="shortcut icon" href="images/management.png" type="image/x-icon">
-    @vite('resources/css/app.css')
-            <!-- Aniation AOS.js -->
-            @include('aos')
+    @include('style')
+    <!-- Aniation AOS.js -->
+    @include('aos')
 </head>
 <body class="bg-slate-100 h-screen items-center justify-center">
 

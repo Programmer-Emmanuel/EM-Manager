@@ -6,7 +6,7 @@
     <title>Dashboard Entreprise - EM-Manager</title>
     <link rel="shortcut icon" href="/images/management.png" type="image/x-icon" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-    @vite('resources/css/app.css')
+    @include('style')
 
     <!-- Animation AOS.js -->
     @include('aos')

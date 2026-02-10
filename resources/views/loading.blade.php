@@ -1,4 +1,4 @@
-    @vite('resources/css/app.css')
+    @include('style')
   <style>
     #loading {
       position: fixed;
