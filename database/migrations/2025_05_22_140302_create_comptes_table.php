@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comptes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('entreprise_id');
-            $table->integer('montant');
+            $table->decimal('montant', 12, 2);
             $table->timestamps();
         });
     }

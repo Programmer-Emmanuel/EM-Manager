@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <!-- Bouton pour commencer un chat -->
-                    <button id="commencerChatBtn" class="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white px-5 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <button id="commencerChatBtn" class="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-5 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
                         <i class="fas fa-comments"></i>
                         <span>Commencer un chat</span>
                         <i class="fas fa-chevron-right ml-1 text-sm"></i>
@@ -101,7 +101,7 @@
                 <!-- Section chat (cachée par défaut) -->
                 <div id="chatSection" class="hidden bg-slate-800 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden" data-aos="fade-up">
                     <!-- En-tête du chat -->
-                    <div class="bg-gradient-to-r from-green-600/10 to-emerald-500/10 p-4 border-b border-slate-700/50 flex justify-between items-center">
+                    <div class="bg-gradient-to-r from-yellow-600/10 to-orange-500/10 p-4 border-b border-slate-700/50 flex justify-between items-center">
                         <div>
                             <h2 class="font-semibold text-white flex items-center">
                                 <i class="fas fa-comments mr-2"></i> Discussion avec ManagerAI
@@ -127,7 +127,7 @@
                             <!-- Message de bienvenue -->
                             <div id="welcomeMessage" class="bg-slate-700/50 rounded-xl p-5 max-w-[90%] sm:max-w-[80%]">
                                 <div class="flex items-start space-x-3">
-                                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
                                         <i class="fas fa-robot text-white text-sm"></i>
                                     </div>
                                     <div class="flex-1">
@@ -155,7 +155,7 @@
                                                 <span>Stratégies de croissance et développement</span>
                                             </li>
                                         </ul>
-                                        <p class="text-green-300 font-medium text-sm">
+                                        <p class="text-orange-300 font-medium text-sm">
                                             Posez-moi n'importe quelle question sur votre entreprise, je répondrai en fonction de vos données !
                                         </p>
                                     </div>
@@ -166,7 +166,7 @@
                         <!-- Indicateur de frappe -->
                         <div id="typingIndicator" class="hidden p-4 border-t border-slate-700 bg-slate-800/50">
                             <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                                <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
                                     <i class="fas fa-robot text-white text-sm"></i>
                                 </div>
                                 <div class="typing-indicator">
@@ -197,7 +197,7 @@
                                 <button 
                                     type="submit" 
                                     id="sendBtn" 
-                                    class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] sm:min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    class="bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-700 hover:to-orangeyellow-600 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] sm:min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <i class="fas fa-paper-plane"></i>
                                     <span class="hidden sm:inline ml-2">Envoyer</span>

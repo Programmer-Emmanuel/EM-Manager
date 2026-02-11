@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('entreprise_id');
+            $table->uuid('employe_id')->nullable();
             $table->string('motif');
             $table->string('type');
-            $table->integer('montant');
+            $table->string('reference')->nullable();
+            $table->string('statut')->nullable();
+            $table->decimal('montant', 12, 2);
             $table->timestamps();
         });
     }

@@ -1,97 +1,122 @@
 @extends('dashboard_base')
 
 @section('main')
-<main class="flex-1 bg-slate-900 mt-15">
-    <div class="p-4">
-        <div class="max-w-6xl mx-auto space-y-6">
-            <!-- En-tête simple -->
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-bold text-white">Paiement des salaires</h1>
-                    <p class="text-slate-400">Payez vos employés via KkiaPay</p>
+<main class="flex-1 overflow-hidden relative bg-slate-900">
+    <div class="absolute inset-0 overflow-y-auto hide-scrollbar p-2">
+        <div class="flex items-center justify-center px-4 py-8">
+            <div class="max-w-6xl w-full space-y-8">
+                <!-- En-tête simple -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Paiement des salaires</h1>
+                        <p class="text-slate-400">Payez vos employés via KkiaPay</p>
+                    </div>
+                    <a href="{{ route('paiement.historique') }}" 
+                       class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition">
+                        <i class="fas fa-history"></i>
+                        <span>Historique</span>
+                    </a>
                 </div>
-                <a href="{{ route('paiement.historique') }}" class="text-blue-400 hover:text-blue-300">
-                    <i class="fas fa-history mr-2"></i>Historique
-                </a>
-            </div>
 
-            <!-- Solde -->
-            <div class="bg-slate-800 p-4 rounded-lg">
-                <p class="text-slate-400 mb-1">Solde disponible</p>
-                <p class="text-3xl font-bold text-green-400">
-                    {{ number_format($compte->montant, 0, ',', ' ') }} FCFA
-                </p>
-                <p class="text-slate-500 text-sm mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    Mode test: MTN 61000000 | MOOV 68000000
-                </p>
-            </div>
-
-            <!-- Tableau simplifié -->
-            @if($employes->isNotEmpty())
-            <div class="bg-slate-800 rounded-lg overflow-hidden">
-                <table class="w-full">
-                    <thead class="bg-slate-900">
-                        <tr>
-                            <th class="py-3 px-4 text-left text-slate-400">Employé</th>
-                            <th class="py-3 px-4 text-left text-slate-400">Salaire</th>
-                            <th class="py-3 px-4 text-left text-slate-400">Statut</th>
-                            <th class="py-3 px-4 text-left text-slate-400">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($employes as $employe)
-                        <tr class="border-t border-slate-700 hover:bg-slate-700/30">
-                            <td class="py-3 px-4">
-                                <div>
-                                    <p class="font-medium text-white">{{ $employe->prenom_employe }} {{ $employe->nom_employe }}</p>
-                                    <p class="text-sm text-slate-500">{{ $employe->poste }}</p>
-                                </div>
-                            </td>
-                            <td class="py-3 px-4">
-                                <p class="text-green-400 font-medium">
-                                    {{ number_format($employe->salaire, 0, ',', ' ') }} FCFA
-                                </p>
-                            </td>
-                            <td class="py-3 px-4">
-                                @if($employe->deja_paye_ce_mois)
-                                <span class="text-green-400 text-sm">
-                                    <i class="fas fa-check-circle mr-1"></i>Payé
-                                </span>
-                                @else
-                                <span class="text-yellow-400 text-sm">
-                                    <i class="fas fa-clock mr-1"></i>À payer
-                                </span>
-                                @endif
-                            </td>
-                            <td class="py-3 px-4">
-                                <form class="paiement-form inline-block" data-employe-id="{{ $employe->id }}">
-                                    @csrf
-                                    <input type="hidden" name="montant" value="{{ $employe->salaire }}">
-                                </form>
-                                <button type="button"
-                                        onclick="initierPaiement('{{ $employe->id }}')"
-                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm
-                                               disabled:opacity-50 disabled:cursor-not-allowed paiement-btn"
-                                        data-employe-id="{{ $employe->id }}"
-                                        @if($employe->deja_paye_ce_mois) disabled @endif>
-                                    <i class="fas fa-credit-card mr-2"></i>Payer
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @else
-            <div class="text-center py-12">
-                <div class="bg-slate-800/50 rounded-lg p-8">
-                    <i class="fas fa-user-check text-4xl text-green-500 mb-4"></i>
-                    <h3 class="text-lg font-bold text-white mb-2">Tous les salaires sont payés</h3>
-                    <p class="text-slate-400">Aucun employé à payer ce mois-ci.</p>
+                <!-- Solde -->
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-slate-400 mb-2">Solde disponible</p>
+                            <p class="text-3xl font-bold text-green-400">
+                                {{ number_format($compte->montant, 0, ',', ' ') }} FCFA
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Tableau simplifié -->
+                @if($employes->isNotEmpty())
+                <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-700">
+                        <h2 class="text-lg font-bold text-white">
+                            <i class="fas fa-users mr-2"></i>Liste des employés à payer
+                        </h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-slate-900/50">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-slate-400">Employé</th>
+                                    <th class="py-3 px-4 text-left text-slate-400">Salaire</th>
+                                    <th class="py-3 px-4 text-left text-slate-400">Statut</th>
+                                    <th class="py-3 px-4 text-left text-slate-400">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($employes as $employe)
+                                <tr class="border-t border-slate-700 hover:bg-slate-700/30">
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-slate-400"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-white">{{ $employe->prenom_employe }} {{ $employe->nom_employe }}</p>
+                                                <p class="text-sm text-slate-500">{{ $employe->poste }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-money-bill-wave text-green-400"></i>
+                                            <p class="text-green-400 font-medium">
+                                                {{ number_format($employe->salaire, 0, ',', ' ') }} FCFA
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        @if($employe->est_paye_ce_mois)
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-900/30 text-green-400 rounded-full text-sm border border-green-800">
+                                            <i class="fas fa-check-circle text-xs"></i>
+                                            Payé
+                                        </span>
+                                        @else
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-900/30 text-yellow-400 rounded-full text-sm border border-yellow-800">
+                                            <i class="fas fa-clock text-xs"></i>
+                                            À payer
+                                        </span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <form class="paiement-form inline-block" data-employe-id="{{ $employe->id }}">
+                                            @csrf
+                                            <input type="hidden" name="montant" value="{{ $employe->salaire }}">
+                                        </form>
+                                        <button type="button"
+                                                onclick="initierPaiement('{{ $employe->id }}')"
+                                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition
+                                                       disabled:opacity-50 disabled:cursor-not-allowed paiement-btn"
+                                                data-employe-id="{{ $employe->id }}"
+                                                @if($employe->est_paye_ce_mois) disabled @endif>
+                                            <i class="fas fa-credit-card"></i>
+                                            <span>Payer</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @else
+                <div class="text-center py-12">
+                    <div class="bg-slate-800/50 rounded-xl p-8 border border-slate-700">
+                        <div class="w-16 h-16 bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-check text-2xl text-green-400"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Tous les salaires sont payés</h3>
+                        <p class="text-slate-400">Aucun employé à payer ce mois-ci.</p>
+                    </div>
+                </div>
+                @endif
             </div>
-            @endif
         </div>
     </div>
 
@@ -101,16 +126,16 @@
             <div class="bg-slate-800 rounded-2xl w-full max-w-md mx-auto border border-slate-700 
                         transform transition-all duration-300 scale-95 opacity-0
                         modal-content max-h-[90vh] overflow-hidden flex flex-col">
-                <div class="flex-shrink-0 p-2 border-b border-slate-700/50 bg-slate-800/90">
+                <div class="flex-shrink-0 p-6 border-b border-slate-700/50 bg-slate-800/90">
                     <div class="text-center">
-                        <div class="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
+                        <div class="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i class="fas fa-credit-card text-2xl text-blue-400"></i>
                         </div>
                         <h3 class="text-2xl font-bold text-white mb-2">Confirmer le paiement</h3>
                     </div>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex-1 overflow-y-auto p-6 hide-scrollbar">
                     <div id="employeDetails" class="p-6 bg-slate-700/30 rounded-xl border border-slate-600">
                         <!-- Les détails seront injectés ici -->
                         <div class="animate-pulse space-y-4">
@@ -118,7 +143,6 @@
                             <div class="h-4 bg-slate-700 rounded w-1/2"></div>
                         </div>
                     </div>
-                    
                 </div>
 
                 <!-- Boutons -->
@@ -126,16 +150,16 @@
                     <div class="flex flex-col sm:flex-row gap-3 justify-end">
                         <button onclick="fermerModal()" 
                                 class="px-5 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl transition
-                                       flex-1 sm:flex-none flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>
+                                       flex-1 sm:flex-none flex items-center justify-center gap-2">
+                            <i class="fas fa-times"></i>
                             <span>Annuler</span>
                         </button>
                         <button onclick="ouvrirKkiaPay()" 
                                 id="confirmPaiementBtn"
                                 class="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 
                                        hover:from-blue-700 hover:to-blue-800 rounded-xl transition
-                                       flex-1 sm:flex-none flex items-center justify-center">
-                            <i class="fas fa-check mr-2"></i>
+                                       flex-1 sm:flex-none flex items-center justify-center gap-2">
+                            <i class="fas fa-check"></i>
                             <span id="btnText">Confirmer et payer</span>
                         </button>
                     </div>
@@ -294,6 +318,8 @@ function ouvrirKkiaPay() {
             data: JSON.stringify({
                 reference: paiementData.reference,
                 employe_id: paiementData.employe.id,
+                entreprise_id: paiementData.employe.entreprise_id,
+                montant: paiementData.montant,
                 type: "salaire"
             }),
             theme: "#0095ff" // Optionnel: couleur du widget
@@ -436,13 +462,32 @@ function showNotification(message, type) {
 
 // Initialiser
 document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter le style pour la barre de défilement invisible
     const style = document.createElement('style');
     style.textContent = `
-        .modal-container { -webkit-overflow-scrolling: touch; }
-        .modal-content { max-height: calc(100vh - 2rem); }
+        .hide-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .modal-container { 
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        
+        .modal-content { 
+            max-height: 90vh;
+        }
         
         @media (max-width: 640px) {
-            .modal-content { max-height: calc(100vh - 1rem); margin: 0.5rem; }
+            .modal-content { 
+                max-height: 95vh;
+                margin: 0.5rem;
+            }
         }
     `;
     document.head.appendChild(style);
@@ -460,4 +505,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+.hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+</style>
 @endsection
