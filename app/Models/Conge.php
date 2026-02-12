@@ -10,6 +10,12 @@ class Conge extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'date_debut' => 'datetime',
+        'date_fin'   => 'datetime',
+    ];
+
+
     public $incrementing = false; // empêche l'auto-incrémentation
     protected $keyType = 'string'; // la clé primaire sera une string
 

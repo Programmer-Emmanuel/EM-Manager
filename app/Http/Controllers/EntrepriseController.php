@@ -138,47 +138,75 @@ class EntrepriseController extends Controller{
     }
 
     public function dashboard_entreprise(){
-        // Récupérer l'entreprise connectée
-        $entreprise = Auth::user();
+    // Récupérer l'entreprise connectée
+    $entreprise = Auth::user();
 
-        // Récupérer les détails de l'entreprise
-        $entrepriseDetails = Entreprise::find($entreprise->id);
+    // Récupérer les détails de l'entreprise
+    $entrepriseDetails = Entreprise::find($entreprise->id);
 
-        // Récupérer la liste des employés de l'entreprise
-        $count_employe = Employe::where('id_entreprise', '=', $entreprise->id)->count();
+    // Récupérer la liste des employés de l'entreprise
+    $count_employe = Employe::where('id_entreprise', '=', $entreprise->id)->count();
 
-        $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
+    $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)
+        ->where('statut', '=', 'En attente...')
+        ->count();
+    
+    // NOUVEAU - Compter les produits
+    $count_produits = Produit::where('id_entreprise', '=', $entreprise->id)->count();
+    
+    // NOUVEAU - Récupérer le solde du compte
+    $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
+    $soldeCompte = $compte ? $compte->montant : 0;
+    
+    $transactions = Transactions::where('entreprise_id', $entreprise->id)->get();
+
+    // Données pour le graphique en barres (par mois)
+    $driver = DB::getDriverName();
+
+    $moisExpression = $driver === 'pgsql'
+        ? DB::raw("to_char(created_at, 'YYYY-MM') as mois")
+        : DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois");
+
+    $transactionsParMois = Transactions::select(
+            $moisExpression,
+            DB::raw("SUM(montant) as total")
+        )
+        ->where('entreprise_id', $entreprise->id)
+        ->groupBy('mois')
+        ->orderBy('mois')
+        ->get();
+
+    // On sépare mois et montants pour le graphique
+    $labels = $transactionsParMois->pluck('mois');
+    $data = $transactionsParMois->pluck('total');
+
+    // NOUVEAU - Données pour le graphique circulaire (par type)
+    $totalEntrees = Transactions::where('entreprise_id', $entreprise->id)
+        ->where('type', 'Entree')
+        ->sum('montant');
         
-        $transactions = Transactions::where('entreprise_id', $entreprise->id)->get();
+    $totalSorties = Transactions::where('entreprise_id', $entreprise->id)
+        ->where('type', 'Sortie')
+        ->sum('montant');
+        
+    $totalAutres = Transactions::where('entreprise_id', $entreprise->id)
+        ->whereNotIn('type', ['Entree', 'Sortie'])
+        ->sum('montant');
 
-
-        $driver = DB::getDriverName();
-
-        $moisExpression = $driver === 'pgsql'
-            ? DB::raw("to_char(created_at, 'YYYY-MM') as mois")
-            : DB::raw("DATE_FORMAT(created_at, '%Y-%m') as mois");
-
-        $transactionsParMois = Transactions::select(
-                $moisExpression,
-                DB::raw("SUM(montant) as total")
-            )
-            ->groupBy('mois')
-            ->orderBy('mois')
-            ->get();
-
-        // On sépare mois et montants pour le graphique
-        $labels = $transactionsParMois->pluck('mois');
-        $data = $transactionsParMois->pluck('total');
-
-        return view('dashboard_entreprise', compact(
-            'entrepriseDetails',
-            'count_employe',
-            'count_conge',
-            'transactions',
-            'labels',
-            'data'
-        ));
-    }
+    return view('dashboard_entreprise', compact(
+        'entrepriseDetails',
+        'count_employe',
+        'count_conge',
+        'count_produits',      // NOUVEAU
+        'soldeCompte',         // NOUVEAU
+        'transactions',
+        'labels',
+        'data',
+        'totalEntrees',       // NOUVEAU
+        'totalSorties',       // NOUVEAU
+        'totalAutres'         // NOUVEAU
+    ));
+}
 
     public function liste_employe(){
         // Récupérer l'entreprise connectée

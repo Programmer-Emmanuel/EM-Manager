@@ -54,6 +54,8 @@ Route::get('/employe/demande/conge', [EmployeController::class, 'demande_conge']
 Route::post('/employe/demande/conge', [EmployeController::class, 'demande_conge_post'])->name('demande_conge_post')->middleware('employe');
 Route::get('/employe/protected', [EmployeController::class, 'employe_protect'])->name('employe_protect');
 Route::post('/chat-ai', [EntrepriseController::class, 'chat'])->name('chat.ai');
+Route::get('/employe/historique/paiements', [EmployeController::class, 'employe_historique_paiements'])->name('employe_historique_paiements')->middleware('employe');
+Route::get('/employe/produits', [EmployeController::class, 'employe_produits'])->name('employe_produits')->middleware('employe');
 
 // Routes pour la gestion des produits
 Route::middleware('entreprise')->group(function () {

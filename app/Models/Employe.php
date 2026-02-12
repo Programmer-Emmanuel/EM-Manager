@@ -30,6 +30,11 @@ class Employe extends Authenticatable
         'role',
     ];
 
+    protected $casts = [
+        'date_embauche' => 'datetime',
+    ];
+
+
     /**
      * Renomme le champ du mot de passe pour l'authentification.
      *
