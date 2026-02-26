@@ -14,7 +14,15 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('entreprise_id');
+            $table->foreign('entreprise_id')
+                ->references('id')
+                ->on('entreprises')
+                ->onDelete('cascade');
             $table->uuid('employe_id')->nullable();
+            $table->foreign('employe_id')
+                ->references('id')
+                ->on('employes')
+                ->onDelete('cascade');
             $table->string('motif');
             $table->string('type');
             $table->string('reference')->nullable();

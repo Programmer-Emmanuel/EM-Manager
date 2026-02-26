@@ -93,7 +93,7 @@
                         </a>
                     @else
                         <div class="flex items-center space-x-4">
-                            <a href="{{route('login')}}" class="fill-btn px-4 py-2 rounded-md text-sm font-medium text-white hover:bg-white hover:bg-opacity-10">
+                            <a href="{{route('login')}}" class="fill-btn px-4 py-2 rounded-md text-sm font-medium text-white hover:bg-opacity-10">
                                 Connexion
                             </a>
                             <a href="{{route('register')}}" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-md">

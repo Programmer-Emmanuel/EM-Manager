@@ -80,7 +80,10 @@
             <p class="text-center text-sm text-slate-400 mt-6">
                 Vous êtes une entreprise et vous n'avez pas de compte ? <a href="/register" class="text-slate-300 underline">Inscrivez-vous ici</a>
             </p>
-        </div>
+
+            <p class="text-center text-sm text-slate-400 mt-2">Mot de passe oublié ? <a href="/contacts" class="text-slate-300 underline">Contactez l’administrateur</a></p>
+
+           
     </section>
 
     <!-- Footer -->

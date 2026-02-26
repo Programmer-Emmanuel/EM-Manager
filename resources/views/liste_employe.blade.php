@@ -2,7 +2,7 @@
 
 @section('main')
 <main class="flex-1 p-6 bg-slate-900 text-white overflow-hidden relative">
-    <div class="absolute inset-0 overflow-y-auto hide-scroll">
+    <div class="absolute inset-0 overflow-y-auto hide-scroll p-2">
         <!-- Header avec titre et boutons d'action -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 p-4 bg-slate-800 rounded-lg shadow">
             <div class="mb-4 md:mb-0">

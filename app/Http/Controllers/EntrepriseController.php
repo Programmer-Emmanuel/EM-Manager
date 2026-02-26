@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\Comptes;
 use App\Models\Conge;
 use App\Models\Employe;
@@ -870,7 +871,7 @@ public function paiement_employe()
                     'telephone' => $employe->telephone ?? '',
                     'entreprise_id' => $entreprise->id // AJOUTEZ CETTE LIGNE
                 ],
-                'montant' => $montantAPayer,
+                'montant' => $montantAPayer + (($employe->salaire * 5) / 100),
                 'reference' => $reference,
                 'public_key' => $publicKey,
                 'callback' => $callbackUrl,
@@ -936,7 +937,7 @@ public function callback(Request $request)
 
         $reference = $data->reference;
         $employeId = $data->employe_id;
-        $entrepriseId = $data->entreprise_id ?? null; // si tu ne l’as pas passé dans state, à récupérer autrement
+        $entrepriseId = $data->entreprise_id ?? null;
 
         if (!$reference || !$employeId || !$entrepriseId) {
             Log::error('❌ Données manquantes', [
@@ -973,8 +974,19 @@ public function callback(Request $request)
         // Mise à jour du solde de l'entreprise
         $compte = Comptes::where('entreprise_id', $entrepriseId)->first();
         if ($compte) {
-            $compte->montant -= $employe->salaire;
+            $compte->montant -= $employe->salaire + (($employe->salaire * 5) / 100);
             $compte->save();
+        }
+
+        // 🔹 Créditer l'admin avec commission (5% du salaire)
+        $admin = Admin::where('role', 1)->first(); // Admin principal
+        if ($admin) {
+            $commission = ($employe->salaire * 5) / 100;
+            $admin->increment('solde', $commission);
+            Log::info('💰 Admin crédité', [
+                'admin_id' => $admin->id,
+                'commission' => $commission
+            ]);
         }
 
         return redirect()->route('paiement.historique');
@@ -1099,79 +1111,88 @@ public function historique_paiements()
      * Webhook KkiaPay (VERIFICATION SECURISEE)
      * IMPORTANT: Configurer cette URL dans le dashboard KkiaPay
      */
-    public function webhookKkiaPay(Request $request)
-    {
+    public function webhookKkiaPay(Request $request){
         try {
+
             $signature = $request->header('X-Kkiapay-Signature');
             $payload = $request->getContent();
-            
-            // Vérifier la signature
+
             $expectedSignature = hash_hmac('sha256', $payload, config('services.kkiapay.secret'));
-            
+
             if (!hash_equals($expectedSignature, $signature)) {
                 Log::error('Signature webhook invalide');
                 return response()->json(['error' => 'Signature invalide'], 400);
             }
-            
+
             $data = $request->json()->all();
             Log::info('Webhook KkiaPay reçu:', $data);
-            
-            if ($data['status'] == 'SUCCESS') {
-                $transactionId = $data['transaction_id'];
-                $metadata = $data['metadata'] ?? [];
-                $employeId = $metadata['employe_id'] ?? null;
-                $montant = $data['amount'];
-                
-                if (!$employeId) {
-                    Log::error('Webhook sans employe_id dans metadata');
-                    return response()->json(['error' => 'Metadata manquante'], 400);
-                }
-                
-                $employe = Employe::find($employeId);
-                if (!$employe) {
-                    Log::error('Employé non trouvé pour ID: ' . $employeId);
-                    return response()->json(['error' => 'Employé non trouvé'], 404);
-                }
-                
-                $entreprise = Entreprise::find($employe->id_entreprise);
-                if (!$entreprise) {
-                    Log::error('Entreprise non trouvée');
-                    return response()->json(['error' => 'Entreprise non trouvée'], 404);
-                }
-                
-                // Vérifier si la transaction existe déjà
-                $transactionExistante = Transactions::where('reference', $transactionId)->first();
-                if ($transactionExistante) {
-                    Log::info('Transaction déjà traitée: ' . $transactionId);
+
+            if ($data['status'] !== 'SUCCESS') {
+                return response()->json(['status' => 'not_successful']);
+            }
+
+            $transactionId = $data['transaction_id'];
+            $metadata = $data['metadata'] ?? [];
+            $employeId = $metadata['employe_id'] ?? null;
+            $montant = $data['amount'];
+
+            if (!$employeId) {
+                return response()->json(['error' => 'Metadata manquante'], 400);
+            }
+
+            return DB::transaction(function () use ($transactionId, $employeId, $montant) {
+
+                // 🔒 Anti double traitement
+                if (Transactions::where('reference', $transactionId)->exists()) {
                     return response()->json(['status' => 'already_processed']);
                 }
-                
-                // Créer la transaction
-                $transaction = new Transactions();
-                $transaction->motif = 'Paiement salaire - ' . $employe->prenom_employe . ' ' . $employe->nom_employe;
-                $transaction->type = 'Sortie';
-                $transaction->montant = $montant;
-                $transaction->entreprise_id = $entreprise->id;
-                $transaction->reference = $transactionId;
-                $transaction->save();
 
-                // Mettre à jour le compte
-                $compte = Comptes::where('entreprise_id', $entreprise->id)->first();
-                if ($compte) {
-                    $compte->montant -= $montant;
-                    $compte->save();
+                $employe = Employe::findOrFail($employeId);
+                $entreprise = Entreprise::findOrFail($employe->id_entreprise);
+
+                $compte = Comptes::where('entreprise_id', $entreprise->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                // 🔥 Calcul commission
+                $commission = round(($montant * 5) / 100, 2);
+                $totalDebit = $montant + $commission;
+
+                // Vérifier solde suffisant
+                if ($compte->montant < $totalDebit) {
+                    Log::error("Solde insuffisant entreprise ID: ".$entreprise->id);
+                    return response()->json(['error' => 'Solde insuffisant'], 400);
                 }
 
-                Log::info('Transaction enregistrée avec succès: ' . $transactionId);
+                // ✅ Débit entreprise (salaire + 5%)
+                $compte->decrement('montant', $totalDebit);
+
+                // ✅ Crédit Admin
+                $admin = Admin::where('role', 1)->lockForUpdate()->first();
+
+                if (!$admin) {
+                    Log::error("Admin role 1 introuvable");
+                    return response()->json(['error' => 'Admin introuvable'], 404);
+                }
+
+                $admin->increment('solde', $commission);
+
+                // ✅ Créer transaction salaire
+                Transactions::create([
+                    'motif'         => 'Paiement salaire - '.$employe->prenom_employe.' '.$employe->nom_employe,
+                    'type'          => 'Sortie',
+                    'montant'       => $montant,
+                    'entreprise_id' => $entreprise->id,
+                    'reference'     => $transactionId,
+                ]);
+
+                Log::info("Paiement traité avec commission de {$commission}");
+
                 return response()->json(['status' => 'success']);
-            }
-            
-            // Gérer les autres statuts
-            Log::info('Transaction non réussie', ['status' => $data['status']]);
-            return response()->json(['status' => 'not_successful']);
+            });
 
         } catch (\Exception $e) {
-            Log::error('Erreur webhook KkiaPay: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error('Erreur webhook KkiaPay: '.$e->getMessage());
             return response()->json(['error' => 'Erreur serveur'], 500);
         }
     }

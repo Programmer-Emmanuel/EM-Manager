@@ -34,6 +34,9 @@ class Employe extends Authenticatable
         'date_embauche' => 'datetime',
     ];
 
+    protected $hidden = [
+        'mot_de_passe'
+    ];
 
     /**
      * Renomme le champ du mot de passe pour l'authentification.

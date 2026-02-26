@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('employes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('id_entreprise');
+            $table->foreign('id_entreprise')
+                ->references('id')
+                ->on('entreprises')
+                ->onDelete('cascade');
             $table->string('nom_employe');
             $table->string('prenom_employe');
             $table->string('adresse_employe');

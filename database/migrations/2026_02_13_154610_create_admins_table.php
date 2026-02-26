@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produits', function (Blueprint $table) {
+        Schema::create('admins', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nom');
-            $table->text('description');
+            $table->string('email')->unique();
+            $table->string('telephone');
             $table->string('image')->nullable();
-            $table->uuid('id_entreprise');
-            $table->foreign('id_entreprise')
-                ->references('id')
-                ->on('entreprises')
-                ->onDelete('cascade');
+            $table->decimal('solde', 12, 2)->default(0);
+            $table->integer('role')->default(2);
+            $table->string('password');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produits');
+        Schema::dropIfExists('admins');
     }
 };

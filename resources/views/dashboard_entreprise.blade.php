@@ -10,7 +10,7 @@
                     <h1 class="text-2xl font-bold text-white tracking-tight">Bienvenue sur le tableau de bord</h1>
                     <p class="text-slate-400 mt-1">Gérez efficacement votre entreprise avec les outils disponibles</p>
                 </div>
-                <span class="text-sm bg-slate-800/50 text-red-200 px-3 py-1 rounded-full">* Votre matricule est indispensable pour vous connecter</span>
+                <span class="text-red-200 text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6 bg-slate-700 rounded-2xl text-center max-w-md">* Votre matricule est indispensable pour vous connecter</span>
             </div>
         </header>
 

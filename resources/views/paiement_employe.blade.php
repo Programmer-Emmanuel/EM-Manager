@@ -10,6 +10,11 @@
                     <div>
                         <h1 class="text-2xl font-bold text-white">Paiement des salaires</h1>
                         <p class="text-slate-400">Payez vos employés via KkiaPay</p>
+                        <div class="mt-5 flex justify-center">
+                            <p class="text-white text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6 bg-slate-700 rounded-2xl text-center max-w-md">
+                                Des frais de paiement peuvent s’appliquer sur vos paiements depuis votre compte.
+                            </p>
+                        </div>
                     </div>
                     <a href="{{ route('paiement.historique') }}" 
                        class="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition">

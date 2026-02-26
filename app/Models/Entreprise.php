@@ -24,6 +24,10 @@ class Entreprise extends Authenticatable
         'role',
     ];
 
+    protected $hidden = [
+        'motDePasse_entreprise'
+    ];
+
 
 
     /**
