@@ -44,6 +44,7 @@ Route::post('/entreprise/transactions', [EntrepriseController::class, 'transacti
 Route::get('/analyse/conseils', [EntrepriseController::class, 'afficherConseils'])->name('analyse_conseils')->middleware('entreprise');
 
 Route::get('/entreprise/protected', [EntrepriseController::class, 'entreprise_protect'])->name('entreprise_protect');
+Route::get('/entreprise/disabled', [EntrepriseController::class, 'entreprise_disabled'])->name('entreprise_disabled');
 
 Route::get('/employe/dashboard', [EmployeController::class, 'employe_dashboard'])->name('employe_dashboard')->middleware('employe');
 Route::get('/employe/compte', [EmployeController::class, 'employe_compte'])->name('employe_compte')->middleware('employe');
@@ -53,6 +54,7 @@ Route::get('/employe/conge', [EmployeController::class, 'employe_conge'])->name(
 Route::get('/employe/demande/conge', [EmployeController::class, 'demande_conge'])->name('demande_conge')->middleware('employe');
 Route::post('/employe/demande/conge', [EmployeController::class, 'demande_conge_post'])->name('demande_conge_post')->middleware('employe');
 Route::get('/employe/protected', [EmployeController::class, 'employe_protect'])->name('employe_protect');
+Route::get('/employe/disabled', [EmployeController::class, 'employe_disabled'])->name('employe_disabled');
 Route::post('/chat-ai', [EntrepriseController::class, 'chat'])->name('chat.ai');
 Route::get('/employe/historique/paiements', [EmployeController::class, 'employe_historique_paiements'])->name('employe_historique_paiements')->middleware('employe');
 Route::get('/employe/produits', [EmployeController::class, 'employe_produits'])->name('employe_produits')->middleware('employe');

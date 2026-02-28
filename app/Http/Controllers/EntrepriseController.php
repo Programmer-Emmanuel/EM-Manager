@@ -137,6 +137,9 @@ class EntrepriseController extends Controller{
     public function entreprise_protect(){
         return view('entreprise_protect');
     }
+    public function entreprise_disabled(){
+        return view('entreprise_disabled');
+    }
 
     public function dashboard_entreprise(){
     // Récupérer l'entreprise connectée
@@ -871,7 +874,6 @@ public function paiement_employe()
                     'telephone' => $employe->telephone ?? '',
                     'entreprise_id' => $entreprise->id // AJOUTEZ CETTE LIGNE
                 ],
-                'montant' => $montantAPayer + (($employe->salaire * 5) / 100),
                 'reference' => $reference,
                 'public_key' => $publicKey,
                 'callback' => $callbackUrl,
@@ -974,20 +976,12 @@ public function callback(Request $request)
         // Mise à jour du solde de l'entreprise
         $compte = Comptes::where('entreprise_id', $entrepriseId)->first();
         if ($compte) {
-            $compte->montant -= $employe->salaire + (($employe->salaire * 5) / 100);
+            $compte->montant -= $employe->salaire;
             $compte->save();
         }
 
         // 🔹 Créditer l'admin avec commission (5% du salaire)
-        $admin = Admin::where('role', 1)->first(); // Admin principal
-        if ($admin) {
-            $commission = ($employe->salaire * 5) / 100;
-            $admin->increment('solde', $commission);
-            Log::info('💰 Admin crédité', [
-                'admin_id' => $admin->id,
-                'commission' => $commission
-            ]);
-        }
+        
 
         return redirect()->route('paiement.historique');
 

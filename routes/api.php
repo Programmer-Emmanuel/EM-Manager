@@ -43,4 +43,5 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/solde/admin', [AdminController::class, 'solde_admin']);
     Route::post('/delete/entreprise/{id}', [AdminController::class, 'delete_entreprise']);
     Route::post('/reset/password/{id}', [AdminController::class, 'renitialiser_mot_passe']);
+    Route::post('/active/entreprise/{id}', [AdminController::class, 'activate_entreprise']);
 });

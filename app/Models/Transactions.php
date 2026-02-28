@@ -29,5 +29,14 @@ class Transactions extends Model
         'motif',
         'type',
         'montant',
+        'employe_id'
     ];
+
+    public function entreprise(){
+        return $this->belongsTo(Entreprise::class, 'entreprise_id');
+    }
+
+    public function employe(){
+        return $this->belongsTo(Employe::class, 'employe_id');
+    }
 }

@@ -11,19 +11,25 @@ class EmployeMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Vérifiez si l'utilisateur est authentifié avec le guard employe
-        if (Auth::guard('employe')->check() && Auth::guard('employe')->user()->role === 'employe') {
-            return $next($request);
+        // Vérifie si l'employé est authentifié
+        if (Auth::guard('employe')->check()) {
+
+            $employe = Auth::guard('employe')->user();
+
+            // Vérifie le rôle
+            if ($employe->role === 'employe') {
+
+                // 🔴 Vérifie si son entreprise est désactivée
+                if ($employe->entreprise && !$employe->entreprise->is_active) {
+                    Auth::guard('employe')->logout();
+                    return redirect('/employe/disabled');
+                }
+
+                return $next($request);
+            }
         }
-        
 
-
-        // Redirigez en cas d'accès non autorisé
+        // Accès non autorisé
         return redirect('/employe/protected');
     }
-
 }
-
-
-
-

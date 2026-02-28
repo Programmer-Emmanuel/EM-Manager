@@ -30,4 +30,8 @@ class Produit extends Model
         'image',
         'id_entreprise',
     ];
+
+    public function entreprise(){
+        return $this->belongsTo(Entreprise::class, 'entreprise_id');
+    }
 }

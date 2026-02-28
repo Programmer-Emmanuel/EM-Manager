@@ -8,6 +8,7 @@ use App\Models\Comptes;
 use App\Models\Employe;
 use App\Models\Entreprise;
 use App\Models\Produit;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -387,32 +388,40 @@ class AdminController extends Controller
     }
 
     public function entreprises(Request $request){
-        try{
+        try {
+
+            // 🔄 Désactiver automatiquement les abonnements expirés
+            Entreprise::whereNotNull('fin_abonnement')
+                ->where('fin_abonnement', '<', now())
+                ->update([
+                    'is_active' => false,
+                    'fin_abonnement' => null
+                ]);
+
+            // 📥 Récupération des entreprises
             $entreprises = Entreprise::orderBy('created_at', 'asc')->get();
-            if($entreprises->isEmpty()){
+
+            if ($entreprises->isEmpty()) {
                 return response()->json([
                     'success' => true,
                     'data' => [],
                     'message' => 'Aucune entreprise trouvée'
-                ],200);
+                ], 200);
             }
-
-            $data = $entreprises->map(function($entreprise){
-                return $entreprise;
-            });
 
             return response()->json([
                 'success' => true,
-                'data' => $data,
-                'message' => 'Liste des entreprises affichées avec succès' 
+                'data' => $entreprises,
+                'message' => 'Liste des entreprises affichées avec succès'
             ]);
-        }
-        catch(Throwable $e){
+
+        } catch (\Throwable $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de l’affichage de la liste des entreprises',
                 'erreur' => $e->getMessage()
-            ],500);
+            ], 500);
         }
     }
 
@@ -450,6 +459,8 @@ class AdminController extends Controller
                     "telephone_entreprise" => $entreprise->telephone_entreprise,
                     "email_entreprise" => $entreprise->email_entreprise,
                     "matricule_entreprise" => $entreprise->matricule_entreprise,
+                    'is_active' => $entreprise->is_active,
+                    'fin_abonnement' => $entreprise->fin_abonnement,
                     "role" => $entreprise->role,
                     "created_at" => $entreprise->created_at,
                     "updated_at" => $entreprise->updated_at,
@@ -626,6 +637,70 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Mot de passe réinitialisé et envoyé par mail.'
         ]);
+    }
+
+    public function activate_entreprise(Request $request, $id){
+        try {
+
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $admin = $request->user(); // Admin connecté
+
+            // Vérification mot de passe admin
+            if (!Hash::check($request->password, $admin->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mot de passe admin incorrect.'
+                ], 403);
+            }
+
+            $entreprise = Entreprise::find($id);
+
+            if (!$entreprise) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Entreprise introuvable'
+                ], 404);
+            }
+
+            // 🔁 Toggle activation
+            $entreprise->is_active = !$entreprise->is_active;
+
+            if ($entreprise->is_active) {
+                // ✅ Ajoute 1 mois
+                $entreprise->fin_abonnement = Carbon::now()->addMonth();
+            } else {
+                $entreprise->fin_abonnement = null;
+            }
+
+            $entreprise->save();
+
+            $message = $entreprise->is_active
+                ? 'Entreprise activée avec succès'
+                : 'Entreprise désactivée avec succès';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ], 200);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l’activation du compte de l’entreprise',
+                'erreur' => $e->getMessage()
+            ], 500);
+        }
     }
 
 

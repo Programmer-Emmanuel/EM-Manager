@@ -324,6 +324,10 @@ public function update_put_password(Request $request)
         return view('employe_protect');
     }
 
+    public function employe_disabled(){
+        return view('employe_disabled');
+    }
+
     public function employe_historique_paiements()
     {
         // Vérifier si un employé est connecté

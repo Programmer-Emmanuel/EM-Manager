@@ -11,16 +11,32 @@ class EntrepriseMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Vérifie si l'utilisateur est authentifié et si son rôle est 'entreprise'
-        if (Auth::check() && Auth::user()->role === 'entreprise') {
-            if (Auth::guard('employe')->check() && Auth::guard('employe')->user()->role === 'employe') {
-                return redirect('/entreprise/protected');
-            }
-            return $next($request);
-        }
-        
+        // Vérifie si l'utilisateur est connecté
+        if (Auth::check()) {
 
-        // Redirige l'utilisateur vers une page de protection ou d'erreur si non autorisé
+            $user = Auth::user();
+
+            // Vérifie si le rôle est entreprise
+            if ($user->role === 'entreprise') {
+
+                // 🔴 Vérifie si l'entreprise est désactivée
+                if ($user->is_active == false) {
+                    Auth::logout();
+                    return redirect('/entreprise/disabled');
+                }
+
+                // Vérifie si c’est un employé connecté avec le guard employe
+                if (Auth::guard('employe')->check() 
+                    && Auth::guard('employe')->user()->role === 'employe') {
+                    
+                    return redirect('/entreprise/protected');
+                }
+
+                return $next($request);
+            }
+        }
+
+        // Si non autorisé
         return redirect('/entreprise/protected');
     }
 }

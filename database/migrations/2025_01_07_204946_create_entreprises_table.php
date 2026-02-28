@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('motDePasse_entreprise');
             $table->string('matricule_entreprise')->unique();
             $table->string('role')->default('entreprise');
+            $table->boolean('is_active')->default(false);
+            $table->dateTime('fin_abonnement')->nullable();
             $table->timestamps();
         });
     }

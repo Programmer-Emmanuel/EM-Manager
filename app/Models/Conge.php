@@ -13,7 +13,17 @@ class Conge extends Model
     protected $casts = [
         'date_debut' => 'datetime',
         'date_fin'   => 'datetime',
+        'id_entreprise',
+        'id_employe'
     ];
+
+    public function entreprise(){
+        return $this->belongsTo(Entreprise::class, 'id_entreprise');
+    }
+
+    public function employe(){
+        return $this->belongsTo(Employe::class, 'id_employe');
+    }
 
 
     public $incrementing = false; // empêche l'auto-incrémentation
