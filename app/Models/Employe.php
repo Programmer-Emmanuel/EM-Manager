@@ -72,35 +72,35 @@ class Employe extends Authenticatable
      *
      * @return string
      */
-    // private static function generateMatricule()
-    // {
-    //     // Récupérer le dernier matricule pour créer un matricule unique
-    //     $lastMatricule = self::latest()->first();
-    //     $lastNumber = 0;
+    private static function generateMatricule()
+    {
+        // Récupérer le dernier matricule pour créer un matricule unique
+        $lastMatricule = self::latest()->first();
+        $lastNumber = 0;
 
-    //     if ($lastMatricule) {
-    //         // Extrait les 3 chiffres du matricule
-    //         $lastNumber = (int) substr($lastMatricule->matricule_employe, 4, 3);
-    //     }
+        if ($lastMatricule) {
+            // Extrait les 3 chiffres du matricule
+            $lastNumber = (int) substr($lastMatricule->matricule_employe, 4, 3);
+        }
 
-    //     // Incrémenter le numéro pour le prochain matricule
-    //     $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        // Incrémenter le numéro pour le prochain matricule
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
 
-    //     // Générer la lettre du matricule (A pour 0, B pour 1, etc.)
-    //     $letter = chr(65 + (($lastNumber) % 26));
+        // Générer la lettre du matricule (A pour 0, B pour 1, etc.)
+        $letter = chr(65 + (($lastNumber) % 26));
 
-    //     // Retourner le matricule complet dans le format EMP-000A
-    //     return 'EMP-' . $newNumber . $letter;
-    // }
-
-
-    private static function generateMatricule(){
-        do {
-            $matricule = 'EMP-' . strtoupper(Str::random(4));
-        } while (self::where('matricule_employe', $matricule)->exists());
-
-        return $matricule;
+        // Retourner le matricule complet dans le format EMP-000A
+        return 'EMP-' . $newNumber . $letter;
     }
+
+
+    // private static function generateMatricule(){
+    //     do {
+    //         $matricule = 'EMP-' . strtoupper(Str::random(4));
+    //     } while (self::where('matricule_employe', $matricule)->exists());
+
+    //     return $matricule;
+    // }
 
 
     public $incrementing = false; // empêche l'auto-incrémentation
