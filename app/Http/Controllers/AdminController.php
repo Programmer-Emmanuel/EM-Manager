@@ -156,7 +156,7 @@ class AdminController extends Controller
         $validator = Validator::make($request->all(), [
             'nom' => 'required',
             'email' => 'required|email|unique:admins',
-            'telephone' => 'required|digits:10'
+            'telephone' => 'required|digits:10|unique:admins'
         ]);
 
         if($validator->fails()){

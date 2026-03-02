@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('nom');
             $table->string('email')->unique();
-            $table->string('telephone');
+            $table->string('telephone')->unique();
             $table->string('image')->nullable();
             $table->decimal('solde', 12, 2)->default(0);
             $table->integer('role')->default(2);
