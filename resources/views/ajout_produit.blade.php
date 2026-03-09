@@ -38,7 +38,7 @@
 
         <!-- Formulaire -->
         <div class="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-xl overflow-hidden">
-            <form action="{{ route('store_produit') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+            <form action="{{ route('store_produit') }}" id="formRegister" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
                 @csrf
 
                 <!-- Nom du produit -->
@@ -127,6 +127,7 @@
                         </a>
                         
                         <button type="submit"
+                                id="btnSubmit"
                                 class="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium rounded-lg border border-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all duration-200 flex items-center justify-center gap-2 w-full sm:w-auto">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -257,5 +258,41 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById('formRegister');
+    const button = document.getElementById('btnSubmit');
+
+    form.addEventListener('submit', function () {
+
+        // Empêche double clic
+        if(button.disabled){
+            return false;
+        }
+
+        button.disabled = true;
+
+        button.innerHTML = `
+            <span class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                    </path>
+                </svg>
+                Soumission en cours...
+            </span>
+        `;
+
+        button.classList.remove('hover:bg-slate-700');
+        button.classList.add('opacity-70','cursor-not-allowed');
+
+    });
+
+});
+
 </script>
 @endsection

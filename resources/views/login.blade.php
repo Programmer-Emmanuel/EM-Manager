@@ -49,7 +49,7 @@
             <p class="text-center text-slate-300 mb-8">Connectez-vous à votre compte EM-Manager.</p>
 
             <!-- Formulaire de connexion -->
-            <form action="/login" method="POST" class="space-y-6">
+            <form id="formRegister" action="/login" method="POST" class="space-y-6">
                 <!-- Ajout du CSRF token pour sécuriser la requête AJAX -->
                 @csrf
                 <!-- Matricule -->
@@ -70,6 +70,7 @@
                 <!-- Bouton de connexion -->
                 <div>
                     <button type="submit" 
+                        id="btnSubmit"
                         class="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 rounded-lg transition duration-300 ease-in-out">
                         Se connecter
                     </button>
@@ -92,4 +93,39 @@
     <!-- Chargement de la page avec loading spinner -->
     @include('loading')
 </body>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById('formRegister');
+    const button = document.getElementById('btnSubmit');
+
+    form.addEventListener('submit', function () {
+
+        // Empêche double clic
+        if(button.disabled){
+            return false;
+        }
+
+        button.disabled = true;
+
+        button.innerHTML = `
+            <span class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z">
+                    </path>
+                </svg>
+                Connexion en cours...
+            </span>
+        `;
+
+        button.classList.remove('hover:bg-slate-700');
+        button.classList.add('opacity-70','cursor-not-allowed');
+
+    });
+
+});
+</script>
 </html>

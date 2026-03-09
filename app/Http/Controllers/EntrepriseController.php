@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\EntrepriseMatriculeMail;
+use App\Mail\MatriculeEmployeMail;
 use App\Models\Admin;
 use App\Models\Comptes;
 use App\Models\Conge;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Response;
 use Kkiapay\Kkiapay;
 
@@ -106,6 +109,9 @@ class EntrepriseController extends Controller{
         $entreprise->email_entreprise = $request->email_entreprise;
         $entreprise->motDePasse_entreprise = Hash::make($request->motDePasse_entreprise);
         $entreprise->save();
+
+        Mail::to($entreprise->email_entreprise)
+            ->send(new EntrepriseMatriculeMail($entreprise));
 
         // Authentifier automatiquement l'entreprise
         Auth::login($entreprise);
@@ -297,6 +303,9 @@ class EntrepriseController extends Controller{
         $employe->date_embauche = now()->toDateString();
         $employe->salaire = $request->salaire;
         $employe->save();
+
+        Mail::to($employe->email_employe)
+            ->send(new MatriculeEmployeMail($employe));
 
         // Redirection avec succès
         return redirect()->route('liste_employe');
@@ -1379,21 +1388,15 @@ public function destroy_produit($id)
 
         $produit->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Produit supprimé avec succès'
-        ]);
+        return redirect()->route('liste_produits')
+            ->with('success', 'Produit supprimé avec succès!');
 
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Produit non trouvé'
-        ], 404);
+        abort(404, 'Produit non trouvé');
     } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Erreur lors de la suppression'
-        ], 500);
+        return redirect()->back()
+            ->with('error', 'Erreur lors de la suppression: ' . $e->getMessage())
+            ->withInput();
     }
 }
 

@@ -197,7 +197,7 @@
                                 <button 
                                     type="submit" 
                                     id="sendBtn" 
-                                    class="bg-gradient-to-r from-yellow-600 to-orange-500 hover:from-yellow-700 hover:to-orangeyellow-600 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] sm:min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    class="bg-slate-700 hover:bg-slate-800 text-white px-4 sm:px-6 py-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] sm:min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <i class="fas fa-paper-plane"></i>
                                     <span class="hidden sm:inline ml-2">Envoyer</span>
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const messageDiv = document.createElement('div');
         const isUser = role === 'user';
         const icon = isUser ? 'fa-user' : 'fa-robot';
-        const bgColor = isUser ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-gradient-to-r from-green-500 to-emerald-500';
+        const bgColor = isUser ? 'bg-slate-600' : 'bg-slate-600';
         const name = isUser ? 'Vous' : 'ManagerAI';
         const alignment = isUser ? 'ml-auto' : '';
         const textAlign = isUser ? 'text-right' : '';
