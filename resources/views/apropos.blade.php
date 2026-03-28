@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth overflow-x-hidden">
+<html lang="fr" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,179 +12,277 @@
     @include('aos')
     
     <style>
-        .team-card {
-            transition: all 0.3s ease;
-            transform: translateY(0);
+        /* Styles modernes et cohérents */
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
         }
-        .team-card:hover {
+        
+        .hero-gradient {
+            background: radial-gradient(circle at 20% 30%, #1e293b, #0f172a);
+        }
+
+        /* Amélioration de la scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+        
+        .about-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.4s ease;
+        }
+        
+        .about-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 15px 30px -12px rgba(99, 102, 241, 0.2);
         }
+        
         .icon-circle {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 1.5rem;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .icon-circle i {
+            font-size: 2rem;
+            color: #818cf8;
+        }
+        
+        .team-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .team-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 35px -12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .team-image {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
             border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            overflow: hidden;
+            border: 3px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+        
+        .team-card:hover .team-image {
+            border-color: #8b5cf6;
+            transform: scale(1.05);
+        }
+        
+        .team-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #818cf8;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-outline {
+            border: 2px solid #6366f1;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline:hover {
+            background: rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .value-item {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .value-item:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: scale(1.02);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white overflow-x-hidden">
-    <!-- Barre de navigation : nav.blade.php -->
+<body class="antialiased overflow-x-hidden">
+    <!-- Barre de navigation -->
     @include('nav')
 
-    <!-- Hero Section -->
-    <header class="relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 py-24 md:py-32 overflow-hidden">
-        <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+    <!-- Hero Section moderne -->
+    <section class="hero-gradient min-h-[60vh] flex items-center relative overflow-hidden">
+        <!-- Éléments décoratifs -->
+        <div class="absolute top-20 left-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
         
-        <div class="container mx-auto px-6 relative z-10 text-center" data-aos="fade-up" data-aos-duration="800">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Votre partenaire en <span class="text-blue-400">gestion RH</span></h1>
-            <p class="text-xl text-gray-300 max-w-3xl mx-auto mb-8">Une solution complète et innovante pour optimiser la gestion de vos employés et ressources humaines.</p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="{{route('service')}}" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <i class="fas fa-briefcase mr-2"></i> Nos services
-                </a>
-                <a href="{{route('contact')}}" class="px-8 py-3 border-2 border-white text-white hover:bg-white hover:text-slate-900 font-medium rounded-lg transition-all duration-300 transform hover:scale-105">
-                    <i class="fas fa-envelope mr-2"></i> Nous contacter
-                </a>
+        <div class="container mx-auto p-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center" data-aos="fade-up" data-aos-duration="800">
+                <span class="section-badge">
+                    <i class="fas fa-users mr-2"></i> Qui sommes-nous ?
+                </span>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                    Votre partenaire <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">RH de confiance</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+                    Une solution complète et innovante pour optimiser la gestion de vos employés et ressources humaines.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{{route('service')}}" class="btn-primary px-8 py-3 rounded-full text-white font-semibold inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-briefcase"></i> Découvrir nos services
+                        <i class="fas fa-arrow-right text-sm"></i>
+                    </a>
+                    <a href="{{route('contact')}}" class="btn-outline px-8 py-3 rounded-full text-white font-semibold inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-envelope"></i> Nous contacter
+                    </a>
+                </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <!-- About Section -->
-    <section class="py-20 bg-slate-800" id="apropos">
+    <!-- Mission, Vision, Valeurs - Version simplifiée -->
+    <section class="py-24 relative">
         <div class="container mx-auto px-6">
-            <!-- Mission -->
-            <div class="max-w-4xl mx-auto mb-20" data-aos="fade-up" data-aos-duration="800">
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/3 flex justify-center">
-                        <div class="icon-circle text-white text-4xl">
-                            <i class="fas fa-bullseye"></i>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Mission -->
+                <div class="about-card p-8 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="icon-circle">
+                        <i class="fas fa-bullseye"></i>
                     </div>
-                    <div class="md:w-2/3">
-                        <h2 class="text-3xl font-bold mb-6 text-white">Notre Mission</h2>
-                        <p class="text-lg text-gray-300 leading-relaxed">
-                            Chez EM-Manager, nous nous engageons à révolutionner la gestion RH en proposant des solutions innovantes, simples et efficaces. Notre plateforme a été conçue pour aider les entreprises de toutes tailles à optimiser la gestion de leurs équipes, des congés aux paies, en passant par le suivi des performances.
-                        </p>
-                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-4">Notre Mission</h2>
+                    <p class="text-slate-400 leading-relaxed">
+                        Révolutionner la gestion RH en proposant des solutions innovantes, simples et efficaces pour aider les entreprises à optimiser la gestion de leurs équipes.
+                    </p>
                 </div>
-            </div>
 
-            <!-- Vision -->
-            <div class="max-w-4xl mx-auto mb-20" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
-                <div class="flex flex-col md:flex-row-reverse items-center gap-8">
-                    <div class="md:w-1/3 flex justify-center">
-                        <div class="icon-circle text-white text-4xl">
-                            <i class="fas fa-eye"></i>
-                        </div>
+                <!-- Vision -->
+                <div class="about-card p-8 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="icon-circle">
+                        <i class="fas fa-eye"></i>
                     </div>
-                    <div class="md:w-2/3">
-                        <h2 class="text-3xl font-bold mb-6 text-white">Notre Vision</h2>
-                        <p class="text-lg text-gray-300 leading-relaxed">
-                            Nous aspirons à devenir la référence en matière de solutions RH numériques, permettant aux entreprises de se concentrer sur leur cœur de métier tout en automatisant et simplifiant leurs processus administratifs. Notre objectif est d'accompagner la transformation digitale des services RH.
-                        </p>
-                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-4">Notre Vision</h2>
+                    <p class="text-slate-400 leading-relaxed">
+                        Devenir la référence en matière de solutions RH numériques, accompagnant la transformation digitale des services RH.
+                    </p>
                 </div>
-            </div>
 
-            <!-- Valeurs -->
-            <div class="max-w-4xl mx-auto mb-20" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/3 flex justify-center">
-                        <div class="icon-circle text-white text-4xl">
-                            <i class="fas fa-heart"></i>
-                        </div>
+                <!-- Valeurs -->
+                <div class="about-card p-8 rounded-2xl text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="icon-circle">
+                        <i class="fas fa-heart"></i>
                     </div>
-                    <div class="md:w-2/3">
-                        <h2 class="text-3xl font-bold mb-6 text-white">Nos Valeurs</h2>
-                        <ul class="space-y-4 text-gray-300">
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
-                                <span><strong>Innovation :</strong> Nous repoussons constamment les limites pour offrir des solutions avant-gardistes.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
-                                <span><strong>Simplicité :</strong> Des outils intuitifs pour une prise en main immédiate.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-check-circle text-blue-400 mt-1 mr-3"></i>
-                                <span><strong>Engagement :</strong> Un accompagnement personnalisé pour chaque client.</span>
-                            </li>
-                        </ul>
+                    <h2 class="text-2xl font-bold text-white mb-4">Nos Valeurs</h2>
+                    <div class="space-y-3 text-slate-400">
+                        <div class="flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle text-indigo-400 text-sm"></i>
+                            <span>Innovation</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle text-indigo-400 text-sm"></i>
+                            <span>Simplicité</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-2">
+                            <i class="fas fa-check-circle text-indigo-400 text-sm"></i>
+                            <span>Engagement</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Team Section -->
-    <section class="py-20 bg-slate-900">
+    <!-- Section Équipe - Factorisée et modernisée -->
+    <section class="py-5 relative">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Rencontrez notre équipe</h2>
-                <div class="w-20 h-1 bg-blue-500 mx-auto mb-6"></div>
-                <p class="text-lg text-gray-400 max-w-2xl mx-auto">Une équipe passionnée dédiée à votre succès</p>
+                <span class="section-badge">
+                    <i class="fas fa-user-friends mr-2"></i> Fondateur
+                </span>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Derrière <span class="gradient-text">EM-Manager</span>
+                </h2>
+                <p class="text-lg text-slate-400 max-w-2xl mx-auto">
+                    Une vision, une passion, une innovation au service des entreprises
+                </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up" data-aos-duration="800">
-                <!-- Team Member 1 -->
-                <div class="team-card bg-slate-800 p-8 rounded-xl text-center">
-                    <div class="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-blue-500">
-                        <img src="/images/WhatsApp Image 2025-05-17 à 10.16.48_3684913b.jpg" 
-                             alt="Emmanuel Bamidélé" class="w-full h-full object-cover">
+            <div class="max-w-md mx-auto" data-aos="fade-up" data-aos-duration="800">
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <div class="team-image">
+                        <img src="/images/WhatsApp Image 2025-05-17 à 10.16.48_3684913b.jpg" alt="Emmanuel Bamidélé">
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Emmanuel Bamidélé</h3>
-                    <p class="text-blue-400 font-medium mb-4">CEO & Fondateur</p>
-                    <p class="text-gray-400 mb-4">Visionnaire et entrepreneur passionné par l'innovation RH.</p><br>
+                    <h3 class="text-2xl font-bold text-white mb-2">Emmanuel Bamidélé</h3>
+                    <p class="text-indigo-400 font-medium mb-4">CEO & Fondateur</p>
+                    <div class="flex justify-center gap-1 mb-4">
+                        <i class="fas fa-star text-yellow-500 text-sm"></i>
+                        <i class="fas fa-star text-yellow-500 text-sm"></i>
+                        <i class="fas fa-star text-yellow-500 text-sm"></i>
+                        <i class="fas fa-star text-yellow-500 text-sm"></i>
+                        <i class="fas fa-star text-yellow-500 text-sm"></i>
+                    </div>
+                    <p class="text-slate-400 leading-relaxed mb-6">
+                        Visionnaire et entrepreneur passionné par l'innovation RH, Emmanuel Bamidélé a fondé EM-Manager avec une conviction forte : 
+                        simplifier et optimiser la gestion des ressources humaines pour permettre aux entreprises de se concentrer sur l'essentiel.
+                    </p>
                     <div class="flex justify-center space-x-4">
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-linkedin-in text-lg"></i>
+                        <a href="{{ route('contact') }}" class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
+                            <i class="fab fa-linkedin-in"></i>
                         </a>
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-facebook text-lg"></i>
+                        <a href="{{ route('contact') }}" class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
+                            <i class="fab fa-twitter"></i>
                         </a>
-                    </div>
-                </div>
-
-                <!-- Team Member 2 -->
-                <div class="team-card bg-slate-800 p-8 rounded-xl text-center">
-                    <div class="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-blue-500">
-                        <img src="/images/WhatsApp Image 2025-05-17 à 10.16.48_3684913b.jpg" 
-                             alt="Emmanuel Bamidélé" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Emmanuel Bamidélé</h3>
-                    <p class="text-blue-400 font-medium mb-4">Responsable Produit</p>
-                    <p class="text-gray-400 mb-4">Expert en conception d'expériences utilisateur optimales.</p>
-                    <div class="flex justify-center space-x-4">
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-linkedin-in text-lg"></i>
-                        </a>
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-facebook text-lg"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Team Member 3 -->
-                <div class="team-card bg-slate-800 p-8 rounded-xl text-center">
-                    <div class="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden border-4 border-blue-500">
-                        <img src="/images/WhatsApp Image 2025-05-17 à 10.16.48_3684913b.jpg" 
-                             alt="Emmanuel Bamidélé" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Emmanuel Bamidélé</h3>
-                    <p class="text-blue-400 font-medium mb-4">Développeur Principal</p>
-                    <p class="text-gray-400 mb-4">Architecte des solutions techniques les plus performantes.</p><br>
-                    <div class="flex justify-center space-x-4">
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-linkedin-in text-lg"></i>
-                        </a>
-                        <a href="{{ route('contact') }}" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-facebook text-lg"></i>
+                        <a href="{{ route('contact') }}" class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
+                            <i class="fab fa-github"></i>
                         </a>
                     </div>
                 </div>
@@ -192,18 +290,47 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-16 bg-gradient-to-r from-blue-600 to-blue-800">
-        <div class="container mx-auto px-6 text-center">
+    <!-- Chiffres clés - Section ajoutée pour plus de crédibilité -->
+    <section class="py-16 relative">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-3xl md:text-4xl font-bold text-indigo-400 mb-2">500+</div>
+                    <div class="text-sm text-slate-400">Entreprises clientes</div>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-3xl md:text-4xl font-bold text-indigo-400 mb-2">10k+</div>
+                    <div class="text-sm text-slate-400">Utilisateurs actifs</div>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-3xl md:text-4xl font-bold text-indigo-400 mb-2">98%</div>
+                    <div class="text-sm text-slate-400">Taux de satisfaction</div>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+                    <div class="text-3xl md:text-4xl font-bold text-indigo-400 mb-2">24/7</div>
+                    <div class="text-sm text-slate-400">Support disponible</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section épurée -->
+    <section class="py-20 relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/10 to-purple-600/10"></div>
+        <div class="container mx-auto px-6 text-center relative z-10">
             <div class="max-w-3xl mx-auto" data-aos="fade-up">
-                <h2 class="text-3xl font-bold text-white mb-6">Prêt à révolutionner votre gestion RH ?</h2>
-                <p class="text-xl text-blue-100 mb-8">Rejoignez notre communauté d'entreprises satisfaites et découvrez comment EM-Manager peut transformer votre quotidien.</p>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-500/20 rounded-full mb-6">
+                    <i class="fas fa-chart-line text-2xl text-indigo-400"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Prêt à <span class="gradient-text">révolutionner</span> votre gestion RH ?
+                </h2>
+                <p class="text-lg text-slate-400 mb-8">
+                    Rejoignez notre communauté d'entreprises satisfaites et découvrez comment EM-Manager peut transformer votre quotidien.
+                </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="{{route('register')}}" class="px-8 py-3 bg-white hover:bg-gray-100 text-blue-800 font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
-                        <i class="fas fa-play-circle mr-2"></i> S’inscire
-                    </a>
-                    <a href="{{ route('dashboard_entreprise') }}" class="px-8 py-3 border-2 border-white text-white hover:bg-white hover:text-blue-800 font-bold rounded-lg transition-all duration-300 transform hover:scale-105">
-                        <i class="fas fa-desktop mr-2"></i> Commencer maintenant
+                    <a href="{{route('dashboard_entreprise')}}" class="btn-primary px-8 py-3 rounded-full text-white font-semibold inline-flex items-center justify-center gap-2">
+                        <i class="fas fa-rocket"></i> Commencer maintenant
                     </a>
                 </div>
             </div>
@@ -213,7 +340,7 @@
     <!-- Footer -->
     @include('footer')
 
-    <!-- Chargement de la page avec loading spinner -->
+    <!-- Chargement de la page -->
     @include('loading')
 </body>
 </html>

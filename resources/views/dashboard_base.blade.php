@@ -17,6 +17,7 @@
             margin-left: 10px;
             font-size: 1.2rem;
         }
+        
         #matricule {
             letter-spacing: 3px;
         }

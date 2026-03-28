@@ -226,7 +226,7 @@ class EntrepriseController extends Controller{
         $entrepriseDetails = Entreprise::find($entreprise->id);
 
         // Récupérer la liste des employés de l'entreprise
-        $employes = Employe::where('id_entreprise', '=', $entreprise->id)->get();
+        $employes = Employe::where('id_entreprise', '=', $entreprise->id)->orderBy('created_at', 'asc')->get();
 
         $count_conge = Conge::where('id_entreprise', '=', $entreprise->id)->where('statut', '=', 'En attente...')->count();
 
@@ -883,6 +883,7 @@ public function paiement_employe()
                     'telephone' => $employe->telephone ?? '',
                     'entreprise_id' => $entreprise->id // AJOUTEZ CETTE LIGNE
                 ],
+                'montant' => $montantAPayer, // ✅ AJOUT ICI
                 'reference' => $reference,
                 'public_key' => $publicKey,
                 'callback' => $callbackUrl,
@@ -905,7 +906,7 @@ public function paiement_employe()
 public function callback(Request $request)
 {
     try {
-        $transactionId = $request->input('transaction_id');
+        $transactionId = $request->input('transaction_id') ?? $request->input('data.transaction_id') ?? $request->input('transactionId');
         Log::info('📥 Callback Kkiapay reçu', ['transaction_id' => $transactionId]);
 
         if (!$transactionId) {

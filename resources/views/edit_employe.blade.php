@@ -86,8 +86,18 @@
                     </div>
                     <div>
                         <label for="departement" class="block text-sm font-medium text-slate-300 mb-2">Département</label>
-                        <input type="text" name="departement" id="departement" value="{{ old('departement', $employe->departement) }}" required
+                        <select name="departement" id="departement" required
                             class="w-full p-3 bg-slate-700/30 text-white rounded-lg border border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="" disabled>Sélectionnez un département</option>
+                            <option value="Direction" {{ old('departement', $employe->departement) == 'Direction' ? 'selected' : '' }}>Direction</option>
+                            <option value="Comptabilité" {{ old('departement', $employe->departement) == 'Comptabilité' ? 'selected' : '' }}>Comptabilité</option>
+                            <option value="Juridique" {{ old('departement', $employe->departement) == 'Juridique' ? 'selected' : '' }}>Juridique</option>
+                            <option value="Informatique" {{ old('departement', $employe->departement) == 'Informatique' ? 'selected' : '' }}>Informatique</option>
+                            <option value="Ressources Humaines" {{ old('departement', $employe->departement) == 'Ressources Humaines' ? 'selected' : '' }}>Ressources Humaines</option>
+                            <option value="Communication" {{ old('departement', $employe->departement) == 'Communication' ? 'selected' : '' }}>Communication</option>
+                            <option value="Commercial" {{ old('departement', $employe->departement) == 'Commercial' ? 'selected' : '' }}>Commercial</option>
+                            <option value="Secrétariat" {{ old('departement', $employe->departement) == 'Secrétariat' ? 'selected' : '' }}>Secrétariat</option>
+                        </select>
                     </div>
                 </div>
 

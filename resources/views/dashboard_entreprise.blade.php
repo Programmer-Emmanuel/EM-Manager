@@ -52,7 +52,7 @@
             <div class="bg-slate-800/60 backdrop-blur-sm p-5 rounded-xl border border-slate-700/50 hover:border-slate-600 transition-all duration-200">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-sm font-medium text-slate-300">Produits</h3>
+                        <h3 class="text-sm font-medium text-slate-300">Produits/Services</h3>
                         <p class="text-2xl font-bold mt-1">{{$count_produits ?? 0}}</p>
                     </div>
                     <div class="p-3 rounded-lg bg-slate-700/30">

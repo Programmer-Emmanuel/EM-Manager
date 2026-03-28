@@ -85,8 +85,18 @@
                     </div>
                     <div>
                         <label for="departement" class="block text-sm font-medium text-slate-300 mb-2">Département</label>
-                        <input type="text" name="departement" id="departement" value="{{ old('departement') }}" required
+                        <select name="departement" id="departement" required
                             class="w-full p-3 bg-slate-700/30 text-white rounded-lg border border-slate-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="" disabled {{ old('departement') ? '' : 'selected' }}>Sélectionnez un département</option>
+                            <option value="Direction" {{ old('departement') == 'Direction' ? 'selected' : '' }}>Direction</option>
+                            <option value="Comptabilité" {{ old('departement') == 'Comptabilité' ? 'selected' : '' }}>Comptabilité</option>
+                            <option value="Juridique" {{ old('departement') == 'Juridique' ? 'selected' : '' }}>Juridique</option>
+                            <option value="Informatique" {{ old('departement') == 'Informatique' ? 'selected' : '' }}>Informatique</option>
+                            <option value="Ressources Humaines" {{ old('departement') == 'Ressources Humaines' ? 'selected' : '' }}>Ressources Humaines</option>
+                            <option value="Communication" {{ old('departement') == 'Communication' ? 'selected' : '' }}>Communication</option>
+                            <option value="Commercial" {{ old('departement') == 'Commercial' ? 'selected' : '' }}>Commercial</option>
+                            <option value="Secrétariat" {{ old('departement') == 'Secrétariat' ? 'selected' : '' }}>Secrétariat</option>
+                        </select>
                     </div>
                 </div>
 

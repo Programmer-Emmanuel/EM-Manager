@@ -79,8 +79,8 @@
         </p>
         
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="javascript:history.back()" class="btn-secondary text-white font-medium py-3 px-6 rounded-lg">
-                <i class="fas fa-arrow-left mr-2"></i> Retour
+            <a href="{{route('login')}}" class="btn-secondary text-white font-medium py-3 px-6 rounded-lg">
+                <i class="fas fa-arrow-left mr-2"></i> Connexion
             </a>
             <a href="https://wa.me/2250140022693" class="bg-slate-900 hover:bg-slate-950 text-white font-medium py-3 px-6 rounded-lg">
                 <i class="fas fa-phone mr-2"></i> Contactez l’administrateur
