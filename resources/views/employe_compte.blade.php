@@ -146,7 +146,7 @@
         <div class="flex justify-center mt-6">
             <a href="{{ route('update_password') }}" 
             class="group flex items-center gap-3 px-6 py-3 
-                    bg-blue-600 hover:bg-blue-800
+                    bg-slate-600 hover:bg-slate-800
                     text-white font-semibold rounded-xl shadow-lg 
                     hover:shadow-xl hover:scale-105 
                     transition-all duration-300 ease-in-out">

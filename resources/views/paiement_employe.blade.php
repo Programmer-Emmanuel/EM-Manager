@@ -317,7 +317,7 @@ function ouvrirKkiaPay() {
             position: "right",
             sandbox: true,
             name: paiementData.employe.nom + " " + paiementData.employe.prenom,
-            email: paiementData.employe.email || "",
+            email: "{{ $entrepriseDetails->email_entreprise}}",
             phone: paiementData.employe.telephone || "",
             callback: paiementData.callback,
             data: JSON.stringify({

@@ -187,7 +187,7 @@
                         <div class="relative">
                             <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400 text-sm"></i>
                             <input type="tel" id="numero-entreprise" name="telephone" value="{{ old('telephone') }}" 
-                                   placeholder="+225 01 23 45 67 89"
+                                   placeholder="01 23 45 67 89"
                                    class="form-input w-full px-4 py-3 pl-10 rounded-xl text-white placeholder-slate-500 focus:outline-none">
                         </div>
                         @error('telephone')

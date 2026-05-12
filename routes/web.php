@@ -30,10 +30,14 @@ Route::get('/logout',[EntrepriseController::class, 'logout'])->name('logout');
 Route::get('/entreprise/dashboard',[EntrepriseController::class, 'dashboard_entreprise'])->name('dashboard_entreprise')->middleware('entreprise');
 Route::get('/entreprise/liste/employe', [EntrepriseController::class, 'liste_employe'])->name('liste_employe')->middleware('entreprise');
 Route::get('/employe/export', [EntrepriseController::class, 'export_employe'])->name('export_employe')->middleware('entreprise');
+Route::get('/info/profil', [EntrepriseController::class, 'info_profil'])->name('info_profil')->middleware('entreprise');
+Route::put('/update/profil', [EntrepriseController::class, 'update_profil'])->name('entreprise.update_profil')->middleware('entreprise');
+Route::put('/update/password', [EntrepriseController::class, 'update_password'])->name('entreprise.update_password')->middleware('entreprise');
 Route::get('/entreprise/ajout/employe', [EntrepriseController::class, 'ajout_employe'])->name('ajout_employe')->middleware('entreprise');
 Route::post('/entreprise/store/employe', [EntrepriseController::class,'store_employe'])->name('store_employe')->middleware('entreprise');
 Route::get('/entreprise/employe/{id}/edit', [EntrepriseController::class, 'edit_employe'])->name('edit_employe')->middleware('entreprise');
 Route::put('/entreprise/employe/{id}', [EntrepriseController::class, 'update_employe'])->name('update_employe')->middleware('entreprise');
+Route::delete('/employe/{employeId}/file/{fileId}', [EntrepriseController::class, 'deleteFile'])->name('employe.delete_file')->middleware('entreprise');
 Route::delete('/entreprise/employe/{id}', [EntrepriseController::class, 'destroy_employe'])->name('destroy_employe')->middleware('entreprise');
 Route::get('/entreprise/gestion/conge', [EntrepriseController::class,'gestion_conge'])->name('gestion_conge')->middleware('entreprise');
 Route::patch('/conge/{id}/approuver', [EntrepriseController::class, 'approuver'])->name('conge_approuver')->middleware('entreprise');
@@ -42,6 +46,8 @@ Route::get('/entreprise/comptes', [EntrepriseController::class, 'comptes'])->nam
 Route::get('/entreprise/transactions', [EntrepriseController::class, 'transactions'])->name('transactions')->middleware('entreprise');
 Route::post('/entreprise/transactions', [EntrepriseController::class, 'transactionsPost'])->name('transactionsPost')->middleware('entreprise');
 Route::get('/analyse/conseils', [EntrepriseController::class, 'afficherConseils'])->name('analyse_conseils')->middleware('entreprise');
+Route::get('/chat/ai', [EntrepriseController::class, 'chatPage'])->name('chat.ai.page');
+Route::post('/chat/ai', [EntrepriseController::class, 'chat'])->name('chat.ai');
 
 Route::get('/entreprise/protected', [EntrepriseController::class, 'entreprise_protect'])->name('entreprise_protect');
 Route::get('/entreprise/disabled', [EntrepriseController::class, 'entreprise_disabled'])->name('entreprise_disabled');

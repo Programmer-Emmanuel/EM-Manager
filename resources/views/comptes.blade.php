@@ -15,7 +15,7 @@
             <!-- Bénéfice du compte -->
             <div class="bg-slate-800/50 backdrop-blur-sm p-4 rounded-xl border border-slate-700/50 shadow-md">
                 @php
-                    $montant = $comptes->first()->montant ?? null;
+                    $montant = $comptes->montant ?? null;
                     if ($montant === null) {
                         $colorClass = 'text-slate-400';
                         $texte = "Aucune donnée disponible";

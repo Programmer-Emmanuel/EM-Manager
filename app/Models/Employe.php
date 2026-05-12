@@ -116,5 +116,9 @@ class Employe extends Authenticatable
             }
         });
     }
+
+    public function dossiers(){
+        return $this->hasMany(EmployeDossier::class);
+    }
     
 }

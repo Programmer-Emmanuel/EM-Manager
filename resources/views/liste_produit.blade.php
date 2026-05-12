@@ -87,7 +87,6 @@
             <div class="overflow-x-auto hide-scrollbar">
                 <table class="w-full min-w-max">
                     <thead class="bg-slate-900/80 text-slate-300">
-                        <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Produit</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Description</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Date d'ajout</th>
@@ -97,6 +96,7 @@
                     <tbody class="divide-y divide-slate-700/50" id="productsTable">
                         @forelse($produits as $produit)
                         <tr class="hover:bg-slate-750/50 transition-all duration-300 product-row" 
+                            data-id="{{ $produit->id }}"
                             data-name="{{ strtolower($produit->nom) }}"
                             data-image="{{ $produit->image ? 'true' : 'false' }}">
                             <td class="px-6 py-4">
@@ -143,21 +143,15 @@
                                                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </a>
-                                    <form action="{{ route('destroy_produit', $produit->id) }}" 
-                                          method="POST" 
-                                          onsubmit="return confirmDelete(event, '{{ $produit->nom }}')"
-                                          class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
-                                                title="Supprimer">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            onclick="openDeleteModal('{{ $produit->id }}', '{{ addslashes($produit->nom) }}')"
+                                            class="text-red-400 hover:text-red-300 transition-colors p-2 hover:bg-red-500/10 rounded-lg"
+                                            title="Supprimer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -190,15 +184,105 @@
     </div>
 </main>
 
-<!-- Script pour la suppression et recherche -->
+<!-- MODALE DE CONFIRMATION DE SUPPRESSION -->
+<div id="deleteModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-all duration-300">
+    <div class="bg-slate-800 rounded-xl w-full max-w-md mx-4 shadow-2xl border border-slate-700 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
+        <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-700 flex justify-between items-center">
+            <h2 class="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
+                <i class="fas fa-trash-alt text-red-400"></i>
+                Confirmer la suppression
+            </h2>
+            <button onclick="closeDeleteModal()" class="text-slate-400 hover:text-slate-300 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 sm:p-6">
+            <p class="text-slate-300 text-sm sm:text-base mb-2">
+                Êtes-vous sûr de vouloir supprimer le produit <strong id="productName" class="text-red-400"></strong> ?
+            </p>
+            <p class="text-slate-400 text-xs sm:text-sm">Cette action est irréversible et supprimera toutes les données associées.</p>
+        </div>
+        <div class="flex justify-end gap-3 p-4 sm:p-6 pt-0">
+            <button onclick="closeDeleteModal()" class="px-3 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-sm sm:text-base">
+                Annuler
+            </button>
+            <form id="deleteForm" method="POST" class="inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm sm:text-base">
+                    <i class="fas fa-trash-alt mr-2"></i>Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-function confirmDelete(event, productName) {
-    event.preventDefault();
+let currentDeleteId = null;
+let currentDeleteName = null;
+
+// Ouvrir la modale de confirmation
+function openDeleteModal(productId, productName) {
+    currentDeleteId = productId;
+    currentDeleteName = productName;
     
-    if (confirm(`Êtes-vous sûr de vouloir supprimer "${productName}" ? Cette action est irréversible.`)) {
-        event.target.closest('form').submit();
-    }
+    // Mettre à jour le nom dans la modale
+    document.getElementById('productName').textContent = productName;
+    
+    // Mettre à jour l'action du formulaire avec la route correcte
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = "{{ route('destroy_produit', '') }}/" + productId;
+    
+    // Afficher la modale avec animation
+    const modal = document.getElementById('deleteModal');
+    const modalContent = document.getElementById('deleteModalContent');
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
 }
+
+// Fermer la modale
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    const modalContent = document.getElementById('deleteModalContent');
+    
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        // Réinitialiser les variables
+        currentDeleteId = null;
+        currentDeleteName = null;
+    }, 300);
+}
+
+// Fermer la modale en cliquant à l'extérieur
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('deleteModal');
+    
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            // Vérifier si le clic est sur l'overlay (pas sur le contenu de la modale)
+            if (e.target === modal) {
+                closeDeleteModal();
+            }
+        });
+    }
+
+    // Fermer avec la touche Echap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('deleteModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeDeleteModal();
+            }
+        }
+    });
+});
 
 // Fonction de recherche
 document.getElementById('searchInput')?.addEventListener('input', function(e) {
@@ -277,20 +361,16 @@ document.addEventListener('DOMContentLoaded', function() {
         [id$="Count"], #lastAdded {
             transition: transform 0.3s ease;
         }
-    `;
-    document.head.appendChild(style);
-    
-    // Initialiser les animations
-    const rows = document.querySelectorAll('.product-row');
-    rows.forEach((row, index) => {
-        row.style.animationDelay = `${index * 0.05}s`;
-        row.style.animation = 'slideIn 0.5s ease forwards';
-        row.style.opacity = '0';
-    });
-    
-    // Définir l'animation slideIn
-    const animationStyle = document.createElement('style');
-    animationStyle.textContent = `
+        
+        /* Animation de la modale */
+        .backdrop-blur-sm {
+            backdrop-filter: blur(4px);
+        }
+        
+        #deleteModal {
+            transition: all 0.3s ease;
+        }
+        
         @keyframes slideIn {
             from { 
                 opacity: 0; 
@@ -302,7 +382,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     `;
-    document.head.appendChild(animationStyle);
+    document.head.appendChild(style);
+    
+    // Initialiser les animations
+    const rows = document.querySelectorAll('.product-row');
+    rows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.style.animation = 'slideIn 0.5s ease forwards';
+        row.style.opacity = '0';
+    });
 });
 </script>
+
+<!-- Ajout de FontAwesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 @endsection

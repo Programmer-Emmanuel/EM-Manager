@@ -279,7 +279,7 @@
                             <i class="fab fa-linkedin-in"></i>
                         </a>
                         <a href="{{ route('contact') }}" class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
-                            <i class="fab fa-twitter"></i>
+                            <i class="fab fa-whatsapp"></i>
                         </a>
                         <a href="{{ route('contact') }}" class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 hover:bg-indigo-500 hover:text-white transition-all">
                             <i class="fab fa-github"></i>
