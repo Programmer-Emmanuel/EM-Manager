@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Conge;
 use App\Models\Employe;
 use App\Models\Entreprise;
+use App\Models\Presence;
 use App\Models\Produit;
 use App\Models\Transactions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class EmployeController extends Controller
 {
@@ -406,4 +409,298 @@ public function update_put_password(Request $request)
             'produits'
         ));
     }
+
+
+    //Pointer sa presence par employé
+    public function pointage()
+    {
+        $employe = Auth::guard('employe')->user();
+        Auth::login($employe);
+
+        $employeDetails = Employe::find($employe->id);
+        $entreprise = Entreprise::find($employeDetails->id_entreprise);
+
+        // Vérifier si l'employé a déjà pointé aujourd'hui
+        $presenceAujourdhui = Presence::where('id_employe', $employe->id)
+            ->whereDate('date', today())
+            ->first();
+
+        // Récupérer les 5 dernières présences
+        $dernieresPresences = Presence::where('id_employe', $employe->id)
+            ->orderBy('date', 'desc')
+            ->orderBy('heure_arrivee', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Statistiques du mois
+        $statistiques = $this->getStatistiques($employe->id);
+
+        return view('employe_pointage', compact(
+            'employeDetails',
+            'entreprise',
+            'presenceAujourdhui',
+            'dernieresPresences',
+            'statistiques'
+        ));
+    }
+
+
+    public function arriver(Request $request)
+    {
+        $employe = Auth::guard('employe')->user();
+        
+        // Vérifier si déjà pointé aujourd'hui
+        $existing = Presence::where('id_employe', $employe->id)
+            ->whereDate('date', today())
+            ->first();
+            
+        if ($existing) {
+            return redirect()->back()->with('error', 'Vous avez déjà pointé votre arrivée aujourd\'hui à ' . $existing->heure_arrivee);
+        }
+
+        // Récupérer les informations
+        $userAgent = $request->userAgent();
+        $ip = $request->ip();
+        
+        // Obtenir l'adresse à partir des coordonnées GPS (si fournies)
+        $adresse = null;
+        if ($request->latitude && $request->longitude) {
+            $adresse = $this->getAdresseFromCoordinates($request->latitude, $request->longitude);
+        }
+
+        $heure = now()->format('H:i:s');
+        $heureLimite = '08:00:00';
+        
+        Presence::create([
+            'id_employe' => $employe->id,
+            'id_entreprise' => $employe->id_entreprise,
+            'date' => today(),
+            'heure_arrivee' => $heure,
+            'statut' => $heure > $heureLimite ? 'retard' : 'present',
+            'adresse_pointage' => $adresse,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'adresse_ip' => $ip,
+            'navigateur' => $this->extraireNavigateur($userAgent),
+        ]);
+
+        return redirect()->back()->with('success', 'Arrivée enregistrée avec succès à ' . $heure);
+    }
+
+    public function depart(Request $request)
+    {
+        $employe = Auth::guard('employe')->user();
+        
+        $presence = Presence::where('id_employe', $employe->id)
+            ->whereDate('date', today())
+            ->first();
+
+        if (!$presence) {
+            return redirect()->back()->with('error', 'Vous n\'avez pas encore pointé votre arrivée aujourd\'hui');
+        }
+
+        if ($presence->heure_depart) {
+            return redirect()->back()->with('error', 'Vous avez déjà pointé votre départ à ' . $presence->heure_depart);
+        }
+
+        $heureDepart = now()->format('H:i:s');
+        $presence->update([
+            'heure_depart' => $heureDepart
+        ]);
+
+        return redirect()->back()->with('success', 'Départ enregistré avec succès à ' . $heureDepart);
+    }
+
+    public function listePresences()
+    {
+        $employe = Auth::guard('employe')->user();
+        Auth::login($employe);
+
+        $employeDetails = Employe::find($employe->id);
+        $entreprise = Entreprise::find($employeDetails->id_entreprise);
+
+        // Récupérer toutes les présences avec pagination
+        $presences = Presence::where('id_employe', $employe->id)
+            ->orderBy('date', 'desc')
+            ->orderBy('heure_arrivee', 'desc')
+            ->paginate(15);
+
+        // Statistiques globales
+        $statistiques = $this->getStatistiques($employe->id);
+
+        // Statistiques par mois
+        $statsParMois = Presence::where('id_employe', $employe->id)
+            ->selectRaw('YEAR(date) as annee, MONTH(date) as mois, 
+                         COUNT(*) as total, 
+                         SUM(CASE WHEN statut = "present" THEN 1 ELSE 0 END) as presents,
+                         SUM(CASE WHEN statut = "retard" THEN 1 ELSE 0 END) as retards')
+            ->groupBy('annee', 'mois')
+            ->orderBy('annee', 'desc')
+            ->orderBy('mois', 'desc')
+            ->get();
+
+        return view('employe_liste_presences', compact(
+            'employeDetails',
+            'entreprise',
+            'presences',
+            'statistiques',
+            'statsParMois'
+        ));
+    }
+
+    private function getStatistiques($employeId)
+    {
+        $total = Presence::where('id_employe', $employeId)->count();
+        $present = Presence::where('id_employe', $employeId)
+            ->where('statut', 'present')
+            ->count();
+        $retard = Presence::where('id_employe', $employeId)
+            ->where('statut', 'retard')
+            ->count();
+        $absent = Presence::where('id_employe', $employeId)
+            ->where('statut', 'absent')
+            ->count();
+
+        // Présences du mois
+        $moisActuel = Presence::where('id_employe', $employeId)
+            ->whereMonth('date', now()->month)
+            ->whereYear('date', now()->year)
+            ->count();
+
+        // Présences de la semaine
+        $semaineActuelle = Presence::where('id_employe', $employeId)
+            ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
+            ->count();
+
+        // Taux de présence
+        $tauxPresence = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+        // Moyenne d'heures par jour
+        $heuresTotal = Presence::where('id_employe', $employeId)
+            ->whereNotNull('heure_depart')
+            ->get()
+            ->sum(function($presence) {
+                $arrivee = Carbon::parse($presence->heure_arrivee);
+                $depart = Carbon::parse($presence->heure_depart);
+                return $depart->diffInHours($arrivee);
+            });
+
+        $moyenneHeures = $total > 0 ? round($heuresTotal / $total, 1) : 0;
+
+        return [
+            'total' => $total,
+            'present' => $present,
+            'retard' => $retard,
+            'absent' => $absent,
+            'mois_actuel' => $moisActuel,
+            'semaine_actuelle' => $semaineActuelle,
+            'taux_presence' => $tauxPresence,
+            'moyenne_heures' => $moyenneHeures,
+        ];
+    }
+
+    private function extraireNavigateur($userAgent)
+    {
+        $browsers = [
+            'Firefox' => 'Firefox',
+            'Chrome' => 'Chrome',
+            'Safari' => 'Safari',
+            'Edge' => 'Edge',
+            'Opera' => 'Opera',
+            'MSIE' => 'Internet Explorer',
+            'Trident' => 'Internet Explorer'
+        ];
+
+        foreach ($browsers as $key => $value) {
+            if (str_contains($userAgent, $key)) {
+                return $value;
+            }
+        }
+
+        return 'Inconnu';
+    }
+
+    private function getAdresseFromCoordinates($latitude, $longitude)
+    {
+        if (!$latitude || !$longitude) {
+            return null;
+        }
+
+        try {
+            $response = Http::get('https://nominatim.openstreetmap.org/reverse', [
+                'lat' => $latitude,
+                'lon' => $longitude,
+                'format' => 'json',
+                'accept-language' => 'fr'
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['display_name'] ?? null;
+            }
+        } catch (\Exception $e) {
+            Log::error('Erreur géocodage: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+
+   public function calendrier(Request $request)
+{
+    $employe = Auth::guard('employe')->user();
+    Auth::login($employe);
+
+    $employeDetails = Employe::find($employe->id);
+    $entreprise = Entreprise::find($employeDetails->id_entreprise);
+
+    // Mois et année
+    $mois = $request->mois ?? now()->month;
+    $annee = $request->annee ?? now()->year;
+
+    // Mois précédent et suivant
+    $moisPrecedent = $mois == 1 ? 12 : $mois - 1;
+    $anneePrecedent = $mois == 1 ? $annee - 1 : $annee;
+    $moisSuivant = $mois == 12 ? 1 : $mois + 1;
+    $anneeSuivant = $mois == 12 ? $annee + 1 : $annee;
+
+    // Vérifier si l'employé a déjà pointé aujourd'hui
+    $presenceAujourdhui = Presence::where('id_employe', $employe->id)
+        ->whereDate('date', today())
+        ->first();
+
+    // Récupérer toutes les présences du mois
+    $presences = Presence::where('id_employe', $employe->id)
+        ->whereMonth('date', $mois)
+        ->whereYear('date', $annee)
+        ->get();
+
+    // Indexer par date
+    $presencesParJour = [];
+    foreach ($presences as $presence) {
+        $presencesParJour[$presence->date->format('Y-m-d')] = $presence;
+    }
+
+    // Statistiques du mois
+    $statsMois = [
+        'total' => $presences->count(),
+        'present' => $presences->where('statut', 'present')->count(),
+        'retard' => $presences->where('statut', 'retard')->count(),
+        'absent' => $presences->where('statut', 'absent')->count(),
+    ];
+
+    return view('employe_pointage', compact(
+        'employeDetails',
+        'entreprise',
+        'presencesParJour',
+        'statsMois',
+        'mois',
+        'annee',
+        'moisPrecedent',
+        'anneePrecedent',
+        'moisSuivant',
+        'anneeSuivant',
+        'presenceAujourdhui'
+    ));
+}
 }

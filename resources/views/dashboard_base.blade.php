@@ -22,11 +22,11 @@
             letter-spacing: 3px;
         }
         .hide-scroll {
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         .hide-scroll::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
         }
         html, body {
             height: 100%;
@@ -36,22 +36,19 @@
             -webkit-text-stroke: 1px currentColor;
         }
         
-        /* Classes pour éléments actifs */
         .active-nav {
-            background-color: #374151; /* bg-gray-700 */
+            background-color: #374151;
         }
         
-        /* ManagerAI spécial */
         .manager-ai-nav {
-            background: linear-gradient(to right, #fbbf24, #d97706); /* from-amber-400 to-amber-600 */
-            color: #1f2937; /* text-slate-900 */
+            background: linear-gradient(to right, #fbbf24, #d97706);
+            color: #1f2937;
         }
         
         .manager-ai-nav:hover {
-            background: linear-gradient(to right, #f59e0b, #b45309); /* from-amber-500 to-amber-700 */
+            background: linear-gradient(to right, #f59e0b, #b45309);
         }
         
-        /* Styles pour le menu déroulant RH - Animation slide down */
         .dropdown {
             position: relative;
             width: 100%;
@@ -87,7 +84,6 @@
             transform: rotate(180deg);
         }
         
-        /* Menu déroulant avec animation slide down */
         .dropdown-menu-container {
             max-height: 0;
             opacity: 0;
@@ -100,7 +96,7 @@
         }
         
         .dropdown.active .dropdown-menu-container {
-            max-height: 250px;
+            max-height: 300px;
             opacity: 1;
         }
         
@@ -133,7 +129,6 @@
             background-color: #4b5563;
         }
         
-        /* Menu mobile - DESIGN UI/UX CENTRÉ */
         @media (max-width: 1023px) {
             .mobile-bottom-nav {
                 position: fixed;
@@ -168,7 +163,6 @@
                 min-width: 60px;
             }
             
-            /* Alignement vertical parfait de l'icône et du titre */
             .mobile-bottom-nav > a i,
             .mobile-bottom-nav > a svg,
             .mobile-dropdown > a i,
@@ -198,7 +192,6 @@
                 color: #fff;
             }
             
-            /* Mobile dropdown */
             .mobile-dropdown {
                 position: static;
                 flex: 1;
@@ -217,7 +210,6 @@
                 background: rgba(255, 255, 255, 0.15);
             }
             
-            /* Menu horizontal centré avec cartes UI/UX */
             .mobile-rh-cards {
                 position: absolute;
                 bottom: 80px;
@@ -226,14 +218,15 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 1rem;
-                padding: 0.5rem 1rem;
+                gap: 0.8rem;
+                padding: 0.5rem 0.5rem;
                 opacity: 0;
                 visibility: hidden;
                 transform: translateY(15px);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 z-index: 1002;
                 pointer-events: none;
+                flex-wrap: wrap;
             }
             
             .mobile-dropdown.active .mobile-rh-cards {
@@ -243,18 +236,17 @@
                 pointer-events: all;
             }
             
-            /* Cartes individuelles - Design premium centré */
             .rh-card {
                 background: linear-gradient(145deg, #252b3b, #1e2432);
                 border-radius: 1.2rem;
-                padding: 0.9rem 0.6rem;
+                padding: 0.8rem 0.5rem;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 0.4rem;
-                width: 100px;
-                max-width: 110px;
+                gap: 0.3rem;
+                width: 90px;
+                max-width: 100px;
                 color: #e5e7eb;
                 text-decoration: none;
                 transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -265,23 +257,6 @@
                 overflow: hidden;
             }
             
-            /* Barre supérieure colorée */
-            .rh-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 3px;
-                opacity: 0;
-                transition: opacity 0.25s ease;
-            }
-            
-            .rh-card.active::before {
-                opacity: 1;
-            }
-            
-            /* Effet de survol élégant */
             .rh-card:hover {
                 transform: translateY(-6px) scale(1.02);
                 box-shadow: 0 16px 28px rgba(251, 191, 36, 0.2);
@@ -295,34 +270,33 @@
                 box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
             }
             
-            /* Icônes dans les cartes */
             .rh-card i, .rh-card svg {
-                font-size: 1.7rem;
-                width: 1.7rem;
-                height: 1.7rem;
-                margin-bottom: 0.3rem;
+                font-size: 1.5rem;
+                width: 1.5rem;
+                height: 1.5rem;
+                margin-bottom: 0.2rem;
                 filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             }
             
             .rh-card span {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
                 font-weight: 600;
                 text-align: center;
-                line-height: 1.3;
+                line-height: 1.2;
                 letter-spacing: 0.3px;
             }
             
-            /* Badge pour le compteur de congés */
             .rh-card-badge {
                 position: absolute;
-                top: 6px;
-                right: 6px;
+                top: 4px;
+                right: 4px;
+                background: #ef4444;
                 color: white;
                 border-radius: 9999px;
-                min-width: 20px;
-                height: 20px;
-                padding: 0 5px;
-                font-size: 0.6rem;
+                min-width: 18px;
+                height: 18px;
+                padding: 0 4px;
+                font-size: 0.55rem;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -331,7 +305,6 @@
                 box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
             }
             
-            /* Overlay élégant */
             .mobile-dropdown.active::after {
                 content: '';
                 position: fixed;
@@ -371,7 +344,6 @@
                 width: 100%;
             }
             
-            /* Animation d'entrée séquentielle pour les cartes */
             .mobile-dropdown.active .rh-card {
                 animation: slideUpCard 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
                 opacity: 0;
@@ -380,13 +352,14 @@
             .mobile-dropdown.active .rh-card:nth-child(1) {
                 animation-delay: 0.05s;
             }
-            
             .mobile-dropdown.active .rh-card:nth-child(2) {
                 animation-delay: 0.1s;
             }
-            
             .mobile-dropdown.active .rh-card:nth-child(3) {
                 animation-delay: 0.15s;
+            }
+            .mobile-dropdown.active .rh-card:nth-child(4) {
+                animation-delay: 0.2s;
             }
             
             @keyframes slideUpCard {
@@ -400,26 +373,20 @@
                 }
             }
             
-            /* Adaptation pour très petits écrans */
             @media (max-width: 380px) {
                 .rh-card {
-                    width: 85px;
-                    padding: 0.7rem 0.4rem;
+                    width: 75px;
+                    padding: 0.6rem 0.3rem;
                 }
                 
                 .rh-card i, .rh-card svg {
-                    font-size: 1.5rem;
-                    width: 1.5rem;
-                    height: 1.5rem;
+                    font-size: 1.3rem;
+                    width: 1.3rem;
+                    height: 1.3rem;
                 }
                 
                 .rh-card span {
-                    font-size: 0.65rem;
-                }
-                
-                .mobile-bottom-nav > a span,
-                .mobile-dropdown > a span {
-                    font-size: 0.65rem;
+                    font-size: 0.6rem;
                 }
             }
         }
@@ -438,7 +405,6 @@
             }
         }
         
-        /* Animation desktop */
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -486,7 +452,8 @@
                     <button class="dropdown-button {{ 
                         request()->routeIs('liste_employe') || 
                         request()->routeIs('gestion_conge') || 
-                        request()->routeIs('paiement.employe') ? 'active' : '' }}" 
+                        request()->routeIs('paiement.employe') ||
+                        request()->routeIs('entreprise.presences.employes') ? 'active' : '' }}" 
                         onclick="toggleDropdown(event)">
                         <i class="fas fa-user-tie sm:text-lg text-xs text-slate-300"></i>
                         <span class="ml-3 hidden sm:block flex-1 text-left">Gestionnaire RH</span>
@@ -499,7 +466,11 @@
                                 <i class="fas fa-users"></i>
                                 <span>Employés</span>
                             </a>
-                            <a href="{{ route('gestion_conge') }}" style="--item-index: 1" class="{{ request()->routeIs('gestion_conge') ? 'active' : '' }}">
+                            <a href="{{ route('entreprise.presences.employes') }}" style="--item-index: 1" class="{{ request()->routeIs('entreprise.presences.employes') ? 'active' : '' }}">
+                                <i class="fas fa-fingerprint"></i>
+                                <span>Présences</span>
+                            </a>
+                            <a href="{{ route('gestion_conge') }}" style="--item-index: 2" class="{{ request()->routeIs('gestion_conge') ? 'active' : '' }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
@@ -508,7 +479,7 @@
                                     <span class="bg-white text-slate-900 rounded-full min-w-[24px] h-[24px] px-2 text-sm flex items-center justify-center ml-2">{{ $count_conge }}</span>
                                 @endif
                             </a>
-                            <a href="{{ route('paiement.employe') }}" style="--item-index: 2" class="{{ request()->routeIs('paiement.employe') ? 'active' : '' }}">
+                            <a href="{{ route('paiement.employe') }}" style="--item-index: 3" class="{{ request()->routeIs('paiement.employe') ? 'active' : '' }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
                                 </svg>
@@ -576,7 +547,7 @@
         <!-- Contenu principal -->
         @yield('main')
 
-        <!-- Menu Mobile - DESIGN CENTRÉ AVEC ALIGNEMENT PARFAIT -->
+        <!-- Menu Mobile -->
         <nav class="mobile-bottom-nav lg:hidden">
             <!-- Accueil -->
             <a href="{{ route('dashboard_entreprise') }}" 
@@ -587,26 +558,29 @@
                 <span>Accueil</span>
             </a>
 
-            <!-- Gestionnaire RH Mobile - Icône alignée verticalement -->
+            <!-- Gestionnaire RH Mobile -->
             <div class="mobile-dropdown {{ 
                 request()->routeIs('liste_employe') || 
                 request()->routeIs('gestion_conge') || 
-                request()->routeIs('paiement.employe') ? 'active' : '' }}">
+                request()->routeIs('paiement.employe') ||
+                request()->routeIs('entreprise.presences.employes') ? 'active' : '' }}">
                 
                 <a href="#" onclick="toggleMobileDropdown(event)" class="flex flex-col items-center justify-center">
                     <i class="fas fa-user-tie"></i>
                     <span>RH</span>
                 </a>
                 
-                <!-- Cartes horizontales centrées -->
                 <div class="mobile-rh-cards">
-                    <!-- Carte Employés -->
                     <a href="{{ route('liste_employe') }}" class="rh-card {{ request()->routeIs('liste_employe') ? 'active' : '' }}">
                         <i class="fas fa-users"></i>
                         <span>Employés</span>
                     </a>
                     
-                    <!-- Carte Congés avec badge -->
+                    <a href="{{ route('entreprise.presences.employes') }}" class="rh-card {{ request()->routeIs('entreprise.presences.employes') ? 'active' : '' }}">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Présences</span>
+                    </a>
+                    
                     <a href="{{ route('gestion_conge') }}" class="rh-card {{ request()->routeIs('gestion_conge') ? 'active' : '' }}">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -617,7 +591,6 @@
                         @endif
                     </a>
                     
-                    <!-- Carte Salaire -->
                     <a href="{{ route('paiement.employe') }}" class="rh-card {{ request()->routeIs('paiement.employe') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
@@ -665,7 +638,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Gestion du matricule
             const matriculeElement = document.getElementById('matricule');
             const toggleEyeElement = document.getElementById('toggleEye');
             let isHidden = true;
@@ -680,7 +652,6 @@
                 });
             }
             
-            // Fermeture des dropdowns
             document.addEventListener('click', function(event) {
                 const dropdowns = document.querySelectorAll('.dropdown');
                 dropdowns.forEach(dropdown => {
@@ -698,11 +669,11 @@
                 });
             });
             
-            // Ouverture automatique si page RH active
             const isRhActive = {{ 
                 request()->routeIs('liste_employe') || 
                 request()->routeIs('gestion_conge') || 
-                request()->routeIs('paiement.employe') ? 'true' : 'false' 
+                request()->routeIs('paiement.employe') ||
+                request()->routeIs('entreprise.presences.employes') ? 'true' : 'false' 
             }};
             
             if (isRhActive) {
@@ -713,7 +684,6 @@
                 if (mobileDropdown) mobileDropdown.classList.add('active');
             }
             
-            // Fermeture après clic sur une carte
             const rhCards = document.querySelectorAll('.rh-card');
             rhCards.forEach(card => {
                 card.addEventListener('click', function() {

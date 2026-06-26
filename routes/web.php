@@ -92,3 +92,18 @@ Route::get('/paiement/callback', [EntrepriseController::class, 'callback'])->nam
     
 // Webhook KkiaPay (sans auth car appelé par KkiaPay)
 Route::post('/kkiapay/webhook', [EntrepriseController::class, 'webhookKkiaPay'])->name('kkiapay.webhook');
+
+// Routes de présence pour l'employé
+Route::middleware('employe')->group(function () {
+    Route::get('/employe/pointage', [EmployeController::class, 'pointage'])->name('employe.pointage');
+    Route::post('/employe/arriver', [EmployeController::class, 'arriver'])->name('employe.arriver');
+    Route::post('/employe/depart', [EmployeController::class, 'depart'])->name('employe.depart');
+    Route::get('/employe/mes-presences', [EmployeController::class, 'listePresences'])->name('employe.mes_presences');
+    Route::get('/employe/calendrier', [EmployeController::class, 'calendrier'])->name('employe.calendrier');
+});
+
+// Routes pour les présences des employés (côté entreprise)
+Route::middleware('entreprise')->group(function () {
+    Route::get('/entreprise/presences/employes', [EntrepriseController::class, 'entreprisePresences'])->name('entreprise.presences.employes');
+    Route::get('/entreprise/presences/employe/{id}', [EntrepriseController::class, 'entreprisePresencesEmploye'])->name('entreprise.presences.employe');
+});
